@@ -1,0 +1,198 @@
+# Harbor Helm Chart - Complete values.yaml with initContainers for password setup
+
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: auto
+    auto:
+      commonName: ""
+    secret:
+      secretName: ""
+  ingress:
+    hosts:
+      core: core.harbor.domain
+    controller: default
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    labels: {}
+externalURL: https://core.harbor.domain
+
+persistence:
+  enabled: true
+  resourcePolicy: keep
+  persistentVolumeClaim:
+    registry:
+      size: 5Gi
+      accessMode: ReadWriteOnce
+    jobservice:
+      jobLog:
+        size: 1Gi
+        accessMode: ReadWriteOnce
+    database:
+      size: 1Gi
+      accessMode: ReadWriteOnce
+    redis:
+      size: 1Gi
+      accessMode: ReadWriteOnce
+    trivy:
+      size: 5Gi
+      accessMode: ReadWriteOnce
+  imageChartStorage:
+    disableredirect: false
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+
+harborAdminPassword: "Harbor12345"
+
+containerSecurityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+imagePullPolicy: IfNotPresent
+
+updateStrategy:
+  type: RollingUpdate
+
+logLevel: info
+secretKey: "not-a-secure-key"
+
+nginx:
+  image:
+    repository: docker.io/goharbor/nginx-photon
+    tag: dev
+  initContainers:
+    - name: init-harbor-password
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Setting initial Harbor admin password..."
+          kubectl -n default create secret generic harbor-admin-password \
+            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
+  replicas: 1
+
+portal:
+  image:
+    repository: docker.io/goharbor/harbor-portal
+    tag: dev
+  initContainers:
+    - name: init-harbor-password
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Initializing Harbor portal..."
+          kubectl -n default create secret generic harbor-admin-password \
+            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
+  replicas: 1
+
+core:
+  image:
+    repository: docker.io/goharbor/harbor-core
+    tag: dev
+  initContainers:
+    - name: init-harbor-password
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Initializing Harbor core..."
+          kubectl -n default create secret generic harbor-admin-password \
+            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
+  replicas: 1
+
+jobservice:
+  image:
+    repository: docker.io/goharbor/harbor-jobservice
+    tag: dev
+  initContainers:
+    - name: init-harbor-password
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Initializing Harbor jobservice..."
+          kubectl -n default create secret generic harbor-admin-password \
+            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
+  replicas: 1
+
+registry:
+  registry:
+    image:
+      repository: docker.io/goharbor/registry-photon
+      tag: dev
+    extraEnvVars: []
+  controller:
+    image:
+      repository: docker.io/goharbor/harbor-registryctl
+      tag: dev
+  initContainers:
+    - name: init-harbor-password
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Initializing Harbor registry..."
+          kubectl -n default create secret generic harbor-admin-password \
+            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
+  replicas: 1
+
+trivy:
+  enabled: true
+  image:
+    repository: docker.io/goharbor/trivy-adapter-photon
+    tag: dev
+  initContainers:
+    - name: init-trivy
+      image: alpine/kubectl:latest
+      command:
+        - sh
+        - -c
+        - echo "Trivy init complete"
+  replicas: 1
+
+database:
+  type: internal
+  internal:
+    image:
+      repository: docker.io/goharbor/harbor-db
+      tag: dev
+    initContainer:
+      migrator: {}
+    password: "changeit"
+
+redis:
+  type: internal
+  internal:
+    image:
+      repository: docker.io/goharbor/redis-photon
+      tag: dev
+    initContainers:
+      - name: init-redis
+        image: alpine/kubectl:latest
+        command:
+          - sh
+          - -c
+          - echo "Redis init complete"
+
+exporter:
+  image:
+    repository: docker.io/goharbor/harbor-exporter
+    tag: dev
+  replicas: 1
