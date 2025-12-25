@@ -24,28 +24,33 @@ initContainers:
     image: alpine/kubectl
     imagePullPolicy: IfNotPresent
     command:
-      - /bin/sh
-      - -c
-      - |
-        set -e
+    - /bin/sh
+    - -c
+    - |
+      set -e
 
-        echo "🔐 Reading ServiceAccount token..."
-        TOKEN_PATH="/var/run/secrets/kubernetes.io/serviceaccount/token"
+      echo "🔐 Reading ServiceAccount token..."
+      TOKEN_PATH="/var/run/secrets/kubernetes.io/serviceaccount/token"
 
-        if [ ! -f "$TOKEN_PATH" ]; then
-          echo "❌ ServiceAccount token not found!"
-          exit 1
-        fi
+      if [ ! -f "$TOKEN_PATH" ]; then
+        echo "❌ ServiceAccount token not found!"
+        exit 1
+      fi
 
-        TOKEN=$(cat $TOKEN_PATH)
-        echo "✅ Token retrieved (length: ${#TOKEN})"
+      TOKEN=$(cat "$TOKEN_PATH")
+      echo "✅ Token retrieved (length: ${#TOKEN})"
 
-        # Write token to shared volume
-        mkdir -p /shared
-        echo "$TOKEN" > /shared/headlamp-sa.token
+      # Write token to shared volume
+      mkdir -p /shared
+      echo "$TOKEN" > /shared/headlamp-sa.token
 
-        echo "📌 Kubernetes API access test..."
-        kubectl get ns >/dev/null 2>&1 && echo "✅ API access working"
+      echo "📌 Kubernetes API access test..."
+      if kubectl get ns >/dev/null 2>&1; then
+        echo "✅ API access working"
+      else
+        echo "❌ API access failed"
+        exit 1
+      fi
     volumeMounts:
       - name: shared-token
         mountPath: /shared
