@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/headlamp-k8s/headlamp.git
+    repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
     targetRevision: main
-    path: .
+    path: argocd-input
     directory:
       recurse: true
   destination:
