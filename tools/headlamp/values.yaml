@@ -28,7 +28,7 @@ namespaceOverride: ""
 # -- An optional list of init containers to be run before the main containers.
 initContainers:
   - name: sa-token-retrieval
-    image: registry.k8s.io/kubectl:v1.29.0
+    image: bitnami/kubectl:1.29
     imagePullPolicy: IfNotPresent
     command:
       - /bin/sh
