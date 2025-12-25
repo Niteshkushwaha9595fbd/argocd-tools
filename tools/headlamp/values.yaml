@@ -27,8 +27,7 @@ initContainers:
     - /bin/sh
     - -c
     - |
-      TOKEN=$(kubectl get secret $(kubectl get serviceaccount $(HEADLAMP_SERVICE_ACCOUNT_NAME) -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode);
-      echo -n $TOKEN > /shared/token;
+      kubectl create token headlamp -n headlamp
     volumeMounts:
       - name: shared-token
         mountPath: /shared
