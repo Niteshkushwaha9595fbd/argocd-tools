@@ -221,10 +221,14 @@ service:
 volumeMounts:
   - name: plugins
     mountPath: "/headlamp/plugins"
+  - name: shared-token
+    mountPath: "/shared"
 
 # -- Headlamp pod's volumes
-volumes: 
+volumes:
   - name: plugins
+    emptyDir: {}
+  - name: shared-token
     emptyDir: {}
 
 persistentVolumeClaim:
