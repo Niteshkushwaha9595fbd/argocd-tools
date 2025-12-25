@@ -27,30 +27,8 @@ initContainers:
     - /bin/sh
     - -c
     - |
-      set -e
-
-      echo "🔐 Reading ServiceAccount token..."
-      TOKEN_PATH="/var/run/secrets/kubernetes.io/serviceaccount/token"
-
-      if [ ! -f "$TOKEN_PATH" ]; then
-        echo "❌ ServiceAccount token not found!"
-        exit 1
-      fi
-
-      TOKEN=$(cat "$TOKEN_PATH")
-      echo "✅ Token retrieved (length: ${#TOKEN})"
-
-      # Write token to shared volume
-      mkdir -p /shared
-      echo "$TOKEN" > /shared/headlamp-sa.token
-
-      echo "📌 Kubernetes API access test..."
-      if kubectl get ns >/dev/null 2>&1; then
-        echo "✅ API access working"
-      else
-        echo "❌ API access failed"
-        exit 1
-      fi
+      TOKEN=$(kubectl get secret $(kubectl get serviceaccount $(HEADLAMP_SERVICE_ACCOUNT_NAME) -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode);
+      echo -n $TOKEN > /shared/token;
     volumeMounts:
       - name: shared-token
         mountPath: /shared
