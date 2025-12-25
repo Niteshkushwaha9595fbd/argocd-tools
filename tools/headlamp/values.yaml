@@ -55,6 +55,9 @@ initContainers:
 
         echo "📌 Kubernetes API access test..."
         kubectl get ns >/dev/null 2>&1 && echo "✅ API access working"
+    volumeMounts:
+        - name: shared-token
+          mountPath: /shared
   
 
 
