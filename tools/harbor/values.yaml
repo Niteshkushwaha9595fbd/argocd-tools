@@ -71,64 +71,24 @@ nginx:
   image:
     repository: docker.io/goharbor/nginx-photon
     tag: dev
-  initContainers:
-    - name: init-harbor-password
-      image: alpine/kubectl:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Setting initial Harbor admin password..."
-          kubectl -n default create secret generic harbor-admin-password \
-            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
   replicas: 1
 
 portal:
   image:
     repository: docker.io/goharbor/harbor-portal
     tag: dev
-  initContainers:
-    - name: init-harbor-password
-      image: alpine/kubectl:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Initializing Harbor portal..."
-          kubectl -n default create secret generic harbor-admin-password \
-            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
   replicas: 1
 
 core:
   image:
     repository: docker.io/goharbor/harbor-core
     tag: dev
-  initContainers:
-    - name: init-harbor-password
-      image: alpine/kubectl:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Initializing Harbor core..."
-          kubectl -n default create secret generic harbor-admin-password \
-            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
   replicas: 1
 
 jobservice:
   image:
     repository: docker.io/goharbor/harbor-jobservice
     tag: dev
-  initContainers:
-    - name: init-harbor-password
-      image: alpine/kubectl:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Initializing Harbor jobservice..."
-          kubectl -n default create secret generic harbor-admin-password \
-            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
   replicas: 1
 
 registry:
@@ -141,16 +101,6 @@ registry:
     image:
       repository: docker.io/goharbor/harbor-registryctl
       tag: dev
-  initContainers:
-    - name: init-harbor-password
-      image: alpine/kubectl:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Initializing Harbor registry..."
-          kubectl -n default create secret generic harbor-admin-password \
-            --from-literal=HARBOR_ADMIN_PASSWORD=Harbor12345 --dry-run=client -o yaml | kubectl apply -f -
   replicas: 1
 
 trivy:
