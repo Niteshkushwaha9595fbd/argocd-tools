@@ -67,6 +67,31 @@ updateStrategy:
 logLevel: info
 secretKey: "not-a-secure-key"
 
+internalTLS:
+  enabled: false
+  certSource: auto
+  trustCa: ""
+  core:
+    secretName: ""
+    crt: ""
+    key: ""
+  jobservice:
+    secretName: ""
+    crt: ""
+    key: ""
+  portal:
+    secretName: ""
+    crt: ""
+    key: ""
+  registry:
+    secretName: ""
+    crt: ""
+    key: ""
+  trivy:
+    secretName: ""
+    crt: ""
+    key: ""
+
 nginx:
   image:
     repository: docker.io/goharbor/nginx-photon
