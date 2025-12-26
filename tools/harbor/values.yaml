@@ -164,7 +164,8 @@ trivy:
       command:
         - sh
         - -c
-        - echo "Trivy init complete"
+        - |
+          echo "Trivy init complete"
   replicas: 1
 
 database:
@@ -189,7 +190,8 @@ redis:
         command:
           - sh
           - -c
-          - echo "Redis init complete"
+          - |
+            echo "Redis init complete"
 
 exporter:
   image:

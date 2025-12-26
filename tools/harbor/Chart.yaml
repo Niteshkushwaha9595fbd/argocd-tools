@@ -14,10 +14,7 @@ sources:
   - https://github.com/goharbor/harbor-helm
 
 maintainers:
-  - name: Yan Wang
-    email: yan-yw.wang@broadcom.com
-  - name: Stone Zhang
-    email: stone.zhang@broadcom.com
-  - name: Miner Yang
-    email: miner.yang@broadcom.com
+  - name: niteshkushwaha9595fbd
+    email: niteshkushwaha9595fbd@gmail.com
+
 
