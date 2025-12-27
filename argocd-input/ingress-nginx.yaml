@@ -8,7 +8,6 @@ spec:
 
   source:
     repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
-    chart: ingress-nginx
     targetRevision: main
     path: tools/ingress-nginx  # example, chart version
     helm:
