@@ -122,6 +122,36 @@ expose:
 # If Harbor is deployed behind the proxy, set it as the URL of proxy
 externalURL: https://core.harbor.domain
 
+# Override component images to ARM64 builds
+core:
+  image:
+    repository: goharbor/harbor-core
+    tag: 2.10.3-arm64
+database:
+  image:
+    repository: goharbor/harbor-db
+    tag: 2.10.3-arm64
+redis:
+  image:
+    repository: goharbor/redis-photon
+    tag: 2.10.3-arm64
+jobservice:
+  image:
+    repository: goharbor/harbor-jobservice
+    tag: 2.10.3-arm64
+portal:
+  image:
+    repository: goharbor/harbor-portal
+    tag: 2.10.3-arm64
+registry:
+  image:
+    repository: goharbor/registry-photon
+    tag: 2.10.3-arm64
+trivy:
+  image:
+    repository: goharbor/trivy-adapter-photon
+    tag: 2.10.3-arm64
+
 # The persistence is enabled by default and a default StorageClass
 # is needed in the k8s cluster to provision volumes dynamically.
 # Specify another StorageClass in the "storageClass" or set "existingClaim"
