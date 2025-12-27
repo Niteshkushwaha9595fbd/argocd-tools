@@ -3,42 +3,18 @@ kind: Application
 metadata:
   name: ingress-nginx
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/part-of: devsecops-plateform
-    app.kubernetes.io/category: networking
-    app.kubernetes.io/tier: critical
-    app.kubernetes.io/managed-by: argocd
-    environment: production
-    plateform.io/wave: "one"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
 
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      jsonPointers:
-        - /spec/template/spec/containers/0/resources
-    - group: admissionregistration.k8s.io
-      kind: ValidatingWebhookConfiguration
-      jsonPointers:
-        - /webhooks
-    - group: admissionregistration.k8s.io
-      kind: MutatingWebhookConfiguration
-      jsonPointers:
-        - /webhooks
-
   source:
     repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
-    targetRevision: main
-    path: tools/ingress-nginx
+    chart: ingress-nginx
+    targetRevision: 4.11.3 
+    path: tools/ingress-nginx  # example, chart version
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        controller:
+          replicaCount: 2
 
   destination:
     server: https://kubernetes.default.svc
@@ -50,15 +26,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Validate=false
-      - PruneLast=true
-      - Replace=true
-      - ApplyOutOfSyncOnly=false
-      - RespectIgnoreDifferences=false
-      - ServerSideApply=false
-    retry:
-      limit: 5
-      backoff:
-        duration: "5s"
-        factor: 2
-        maxDuration: "3m"
