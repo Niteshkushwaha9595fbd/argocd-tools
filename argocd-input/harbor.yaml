@@ -18,9 +18,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/goharbor/harbor-helm.git
+    repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
     targetRevision: main
-    path: .
+    path: tools/harbor-chart/harbor
     helm:
       valueFiles:
         - values.yaml
