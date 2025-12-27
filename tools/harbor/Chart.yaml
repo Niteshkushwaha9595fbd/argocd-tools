@@ -12,11 +12,4 @@ icon: https://raw.githubusercontent.com/goharbor/website/main/static/img/logos/h
 sources:
 - https://github.com/goharbor/harbor
 - https://github.com/goharbor/harbor-helm
-maintainers:
-- email: yan-yw.wang@broadcom.com
-  name: Yan Wang
-- email: stone.zhang@broadcom.com
-  name: Stone Zhang
-- email: miner.yang@broadcom.com
-  name: Miner Yang
-engine: gotpl
+
