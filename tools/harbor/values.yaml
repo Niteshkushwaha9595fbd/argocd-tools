@@ -940,7 +940,7 @@ database:
     ## The priority class to run the pod as
     priorityClassName:
     # containers to be run before the controller's container starts.
-    extrInitContainers: []
+    extraInitContainers: []
     # Example:
     #
     # - name: wait
