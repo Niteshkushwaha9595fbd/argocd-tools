@@ -1,65 +1,3 @@
-# values.yaml for Harbor (ARM64, PVC ready)
-expose:
-  type: ingress
-  ingress:
-    hosts:
-      core: harbor.example.com
-      notary: notary.example.com
-
-externalURL: https://harbor.example.com
-
-# ARM64 compatible images
-core:
-  image:
-    repository: goharbor/harbor-core
-    tag: 2.10.3-arm64
-jobservice:
-  image:
-    repository: goharbor/harbor-jobservice
-    tag: 2.10.3-arm64
-portal:
-  image:
-    repository: goharbor/harbor-portal
-    tag: 2.10.3-arm64
-registry:
-  image:
-    repository: goharbor/registry-photon
-    tag: 2.10.3-arm64
-redis:
-  image:
-    repository: goharbor/redis-photon
-    tag: 2.10.3-arm64
-database:
-  image:
-    repository: goharbor/harbor-db
-    tag: 2.10.3-arm64
-trivy:
-  image:
-    repository: goharbor/trivy-adapter-photon
-    tag: 2.10.3-arm64
-
-# Persistence
-persistence:
-  enabled: true
-  resourcePolicy: true
-  persistentVolumeClaim:
-    registry:
-      existingClaim: harbor-registry-pvc
-    jobservice:
-      existingClaim: harbor-jobservice-pvc
-    redis:
-      existingClaim: harbor-redis-pvc
-    database:
-      existingClaim: harbor-database-pvc
-    trivy:
-      existingClaim: harbor-trivy-pvc
-
-# Optional: admin credentials
-harborAdminPassword: "YourStrongPassword"
-
-# TLS / Ingress options (optional)
-tls:
-  enabled: false
 expose:
   # Set how to expose the service. Set the type as "ingress", "clusterIP", "nodePort" or "loadBalancer"
   # and fill the information in the corresponding section
@@ -90,68 +28,61 @@ expose:
       secretName: ""
   ingress:
     hosts:
-       # values.yaml for Harbor (ARM64, PVC ready)
-      expose:
-        type: ingress
-        ingress:
-          hosts:
-            core: harbor.example.com
-            notary: notary.example.com
-
-      externalURL: https://harbor.example.com
-
-      # ARM64 compatible images
-      core:
-        image:
-          repository: goharbor/harbor-core
-          tag: 2.10.3-arm64
-      jobservice:
-        image:
-          repository: goharbor/harbor-jobservice
-          tag: 2.10.3-arm64
-      portal:
-        image:
-          repository: goharbor/harbor-portal
-          tag: 2.10.3-arm64
-      registry:
-        image:
-          repository: goharbor/registry-photon
-          tag: 2.10.3-arm64
-      redis:
-        image:
-          repository: goharbor/redis-photon
-          tag: 2.10.3-arm64
-      database:
-        image:
-          repository: goharbor/harbor-db
-          tag: 2.10.3-arm64
-      trivy:
-        image:
-          repository: goharbor/trivy-adapter-photon
-          tag: 2.10.3-arm64
-
-      # Persistence
-      persistence:
-        enabled: true
-        resourcePolicy: true
-        persistentVolumeClaim:
-          registry:
-            existingClaim: harbor-registry-pvc
-          jobservice:
-            existingClaim: harbor-jobservice-pvc
-          redis:
-            existingClaim: harbor-redis-pvc
-          database:
-            existingClaim: harbor-database-pvc
-          trivy:
-            existingClaim: harbor-trivy-pvc
-
-      # Optional: admin credentials
-      harborAdminPassword: "YourStrongPassword"
-
-      # TLS / Ingress options (optional)
-      tls:
-        enabled: false
+      core: core.harbor.domain
+    # set to the type of ingress controller if it has specific requirements.
+    # leave as `default` for most ingress controllers.
+    # set to `gce` if using the GCE ingress controller
+    # set to `ncp` if using the NCP (NSX-T Container Plugin) ingress controller
+    # set to `alb` if using the ALB ingress controller
+    # set to `f5-bigip` if using the F5 BIG-IP ingress controller
+    controller: default
+    ## Allow .Capabilities.KubeVersion.Version to be overridden while creating ingress
+    kubeVersionOverride: ""
+    className: ""
+    annotations:
+      # note different ingress controllers may require a different ssl-redirect annotation
+      # for Envoy, use ingress.kubernetes.io/force-ssl-redirect: "true" and remove the nginx lines below
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # ingress-specific labels
+    labels: {}
+  route:
+    labels: {}
+    annotations: {}
+      # - name: envoy-internal
+      #   namespace: networking
+      #   sectionName: https
+      #   group: gateway.networking.k8s.io
+      #   kind: Gateway
+    parentRefs: {}
+      # - "harbor.example.com"
+    hosts: []
+  clusterIP:
+    # The name of ClusterIP service
+    name: harbor
+    # The ip address of the ClusterIP service (leave empty for acquiring dynamic ip)
+    staticClusterIP: ""
+    ports:
+      # The service port Harbor listens on when serving HTTP
+      httpPort: 80
+      # The service port Harbor listens on when serving HTTPS
+      httpsPort: 443
+    # Annotations on the ClusterIP service
+    annotations: {}
+    # ClusterIP-specific labels
+    labels: {}
+  nodePort:
+    # The name of NodePort service
+    name: harbor
+    ports:
+      http:
+        # The service port Harbor listens on when serving HTTP
+        port: 80
+        # The node port Harbor listens on when serving HTTP
+        nodePort: 30002
+      https:
         # The service port Harbor listens on when serving HTTPS
         port: 443
         # The node port Harbor listens on when serving HTTPS
@@ -165,10 +96,8 @@ expose:
     name: harbor
     # Set the IP if the LoadBalancer supports assigning IP
     IP: ""
-
     ports:
       # The service port Harbor listens on when serving HTTP
-
       httpPort: 80
       # The service port Harbor listens on when serving HTTPS
       httpsPort: 443
