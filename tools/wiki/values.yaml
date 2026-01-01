@@ -1,6 +1,7 @@
 image:
-  repository: ghcr.io/requarks/wiki
-  tag: 2.5.201
+  # switched to Docker Hub image to avoid missing ghcr tag; change back if you have a specific ghcr tag
+  repository: requarks/wiki
+  tag: latest
   pullPolicy: IfNotPresent
 
 env:
