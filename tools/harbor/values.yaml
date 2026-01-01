@@ -109,15 +109,20 @@ trivy:
     tag: v2.14.1
   replicas: 1
 
-# ---------------- DATABASE (🔥 MAIN FIX HERE) ----------------
+# ---------------- DATABASE (MAIN FIX HERE) ----------------
+# Note: This file currently uses an external database. Replace the placeholders
+# under `database.external` with your real PostgreSQL connection details.
+# If you want Helm to install/manage the internal DB, change `type` to
+# `internal` and provide any required `internal` settings per the chart docs.
 database:
   type: external
   external:
-    host: "EXTERNAL_DB_HOST"      # Replace with your DB host
-    port: 5432                    # Replace with your DB port (default PostgreSQL is 5432)
-    username: "DB_USERNAME"       # Replace with your DB username
-    password: "DB_PASSWORD"       # Replace with your DB password
-    dbname: "harbor"              # Replace if your database name is different
+    host: "EXTERNAL_DB_HOST"      # <-- REPLACE: your DB host (e.g. 10.0.0.5 or db.example.com)
+    port: 5432                      # <-- REPLACE if your DB uses a different port
+    username: "DB_USERNAME"       # <-- REPLACE: DB username
+    password: "DB_PASSWORD"       # <-- REPLACE: DB password (or reference a Kubernetes secret)
+    dbname: "harbor"              # <-- REPLACE if your database name is different
+    # sslmode: "disable"          # Optional: enable/set per your Postgres SSL requirements
 
   maxIdleConns: 100
   maxOpenConns: 900
