@@ -111,23 +111,13 @@ trivy:
 
 # ---------------- DATABASE (🔥 MAIN FIX HERE) ----------------
 database:
-  type: internal
-  internal:
-    image:
-      repository: goharbor/harbor-db
-      tag: v2.14.1
-
-    password: "changeit"
-    shmSizeLimit: 512Mi
-
-    # 🔥 AKS FIX: init container OFF
-    initContainer:
-      enabled: false
-
-    livenessProbe:
-      timeoutSeconds: 5
-    readinessProbe:
-      timeoutSeconds: 5
+  type: external
+  external:
+    host: "EXTERNAL_DB_HOST"      # Replace with your DB host
+    port: 5432                    # Replace with your DB port (default PostgreSQL is 5432)
+    username: "DB_USERNAME"       # Replace with your DB username
+    password: "DB_PASSWORD"       # Replace with your DB password
+    dbname: "harbor"              # Replace if your database name is different
 
   maxIdleConns: 100
   maxOpenConns: 900
