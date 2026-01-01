@@ -59,51 +59,11 @@ persistence:
       rootdirectory: /storage
 
 harborAdminPassword: "Harbor12345"
-existingSecretAdminPassword: ""
-existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 
 internalTLS:
   enabled: false
-  certSource: auto
-
-ipFamily:
-  ipv6:
-    enabled: true
-  ipv4:
-    enabled: true
-  policy: ""
-  families: []
 
 imagePullPolicy: IfNotPresent
-imagePullSecrets: []
-
-updateStrategy:
-  type: RollingUpdate
-
-logLevel: info
-secretKey: "not-a-secure-key"
-existingSecretSecretKey: ""
-
-proxy:
-  httpProxy:
-  httpsProxy:
-  noProxy: 127.0.0.1,localhost,.local,.internal
-  components:
-    - core
-    - jobservice
-    - trivy
-
-enableMigrateHelmHook: false
-
-metrics:
-  enabled: false
-
-trace:
-  enabled: false
-
-cache:
-  enabled: false
-  expireHours: 24
 
 containerSecurityContext:
   privileged: false
@@ -120,30 +80,18 @@ nginx:
     repository: goharbor/nginx-photon
     tag: v2.14.1
   replicas: 1
-  podAnnotations: {}
-  podLabels: {}
-  priorityClassName:
 
 portal:
   image:
     repository: goharbor/harbor-portal
     tag: v2.14.1
   replicas: 1
-  podAnnotations: {}
-  podLabels: {}
 
 core:
   image:
     repository: goharbor/harbor-core
     tag: v2.14.1
   replicas: 1
-  startupProbe:
-    enabled: true
-    initialDelaySeconds: 10
-  podAnnotations: {}
-  podLabels: {}
-  configureUserSettings:
-  quotaUpdateProvider: db
 
 jobservice:
   image:
@@ -151,77 +99,10 @@ jobservice:
     tag: v2.14.1
   replicas: 1
   maxJobWorkers: 10
-  podAnnotations: {}
-  podLabels: {}
+  securityContext:
+    fsGroup: 10000
 
 registry:
   registry:
     image:
-      repository: goharbor/registry-photon
-      tag: v2.14.1
-  controller:
-    image:
-      repository: goharbor/harbor-registryctl
-      tag: v2.14.1
-  replicas: 1
-  podAnnotations: {}
-  podLabels: {}
-  secret: ""
-  existingSecret: ""
-  existingSecretKey: REGISTRY_HTTP_SECRET
-  credentials:
-    username: "harbor_registry_user"
-    password: "harbor_registry_password"
-
-trivy:
-  enabled: true
-  image:
-    repository: goharbor/trivy-adapter-photon
-    tag: v2.14.1
-  replicas: 1
-  resources:
-    requests:
-      cpu: 200m
-      memory: 512Mi
-    limits:
-      cpu: 1
-      memory: 1Gi
-  podAnnotations: {}
-  podLabels: {}
-
-database:
-  type: internal
-  internal:
-    image:
-      repository: goharbor/harbor-db
-      tag: v2.14.1
-    password: "changeit"
-    livenessProbe:
-      timeoutSeconds: 1
-    readinessProbe:
-      timeoutSeconds: 1
-    podAnnotations: {}
-    podLabels: {}
-  maxIdleConns: 100
-  maxOpenConns: 900
-
-redis:
-  type: internal
-  internal:
-    image:
-      repository: goharbor/redis-photon
-      tag: v2.14.1
-    podAnnotations: {}
-    podLabels: {}
-    jobserviceDatabaseIndex: "1"
-    registryDatabaseIndex: "2"
-    trivyAdapterIndex: "5"
-    coreDatabaseIndex: "0"
-
-exporter:
-  image:
-    repository: goharbor/harbor-exporter
-    tag: v2.14.1
-  replicas: 1
-  podAnnotations: {}
-  podLabels: {}
+      r
