@@ -913,7 +913,6 @@ database:
   # if external database is used, set "type" to "external"
   # and fill the connection information in "external" section
   type: internal
-    type: external
   internal:
     image:
       repository: goharbor/harbor-db
