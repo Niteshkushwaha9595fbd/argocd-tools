@@ -910,57 +910,8 @@ trivy:
   timeout: 5m0s
 
 database:
-  # if external database is used, set "type" to "external"
-  # and fill the connection information in "external" section
-  type: internal
-  internal:
-    image:
-      repository: goharbor/harbor-db
-      tag: v2.14.1
-    # set the service account to be used, default if left empty
-    serviceAccountName: ""
-    # mount the service account token
-    automountServiceAccountToken: false
-    # resources:
-    #  requests:
-    #    memory: 256Mi
-    #    cpu: 100m
-    # The timeout used in livenessProbe; 1 to 5 seconds
-    livenessProbe:
-      timeoutSeconds: 1
-    # The timeout used in readinessProbe; 1 to 5 seconds
-    readinessProbe:
-      timeoutSeconds: 1
-    extraEnvVars: []
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
-    ## The priority class to run the pod as
-    priorityClassName:
-    # containers to be run before the controller's container starts.
-    extrInitContainers: []
-    # Example:
-    #
-    # - name: wait
-    #   image: busybox
-    #   command: [ 'sh', '-c', "sleep 20" ]
-    # The initial superuser password for internal database
-    password: "changeit"
-    # The size limit for Shared memory, pgSQL use it for shared_buffer
-    # More details see:
-    # https://github.com/goharbor/harbor/issues/15034
-    shmSizeLimit: 512Mi
-    initContainer:
-      migrator: {}
-      # resources:
-      #  requests:
-      #    memory: 128Mi
-      #    cpu: 100m
-      permissions: {}
-      # resources:
-      #  requests:
-      #    memory: 128Mi
-      #    cpu: 100m
+  # Using external database: internal DB components and init containers removed
+  type: external
   external:
     host: "192.168.0.1"
     port: "5432"
@@ -969,13 +920,7 @@ database:
     coreDatabase: "registry"
     # if using existing secret, the key must be "password"
     existingSecret: ""
-    # "disable" - No SSL
-    # "require" - Always SSL (skip verification)
-    # "verify-ca" - Always SSL (verify that the certificate presented by the
-    # server was signed by a trusted CA)
-    # "verify-full" - Always SSL (verify that the certification presented by the
-    # server was signed by a trusted CA and the server host name matches the one
-    # in the certificate)
+    # sslmode options: disable, require, verify-ca, verify-full
     sslmode: "disable"
   # The maximum number of connections in the idle connection pool per pod (core+exporter).
   # If it <=0, no idle connections are retained.
