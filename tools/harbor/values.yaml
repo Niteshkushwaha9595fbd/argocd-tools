@@ -917,7 +917,7 @@ database:
     port: "5432"
     username: "user"
     password: "password"
-    coreDatabase: "registry"
+    coreDatabase: "harbor"
     # if using existing secret, the key must be "password"
     existingSecret: ""
     # sslmode options: disable, require, verify-ca, verify-full
