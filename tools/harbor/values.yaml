@@ -17,14 +17,6 @@ expose:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
     labels: {}
-  loadBalancer:
-    name: harbor
-    ports:
-      httpPort: 80
-      httpsPort: 443
-    annotations: {}
-    labels: {}
-    sourceRanges: []
 
 externalURL: https://core.harbor.domain
 
@@ -33,30 +25,20 @@ persistence:
   resourcePolicy: "keep"
   persistentVolumeClaim:
     registry:
-      storageClass: ""
       accessMode: ReadWriteOnce
       size: 5Gi
     jobservice:
-      storageClass: ""
       accessMode: ReadWriteOnce
       size: 1Gi
     database:
-      storageClass: ""
       accessMode: ReadWriteOnce
       size: 1Gi
     redis:
-      storageClass: ""
       accessMode: ReadWriteOnce
       size: 1Gi
     trivy:
-      storageClass: ""
       accessMode: ReadWriteOnce
       size: 5Gi
-  imageChartStorage:
-    disableredirect: false
-    type: filesystem
-    filesystem:
-      rootdirectory: /storage
 
 harborAdminPassword: "Harbor12345"
 
@@ -69,40 +51,4 @@ containerSecurityContext:
   privileged: false
   allowPrivilegeEscalation: false
   seccompProfile:
-    type: RuntimeDefault
-  runAsNonRoot: true
-  capabilities:
-    drop:
-      - ALL
-
-nginx:
-  image:
-    repository: goharbor/nginx-photon
-    tag: v2.14.1
-  replicas: 1
-
-portal:
-  image:
-    repository: goharbor/harbor-portal
-    tag: v2.14.1
-  replicas: 1
-
-core:
-  image:
-    repository: goharbor/harbor-core
-    tag: v2.14.1
-  replicas: 1
-
-jobservice:
-  image:
-    repository: goharbor/harbor-jobservice
-    tag: v2.14.1
-  replicas: 1
-  maxJobWorkers: 10
-  securityContext:
-    fsGroup: 10000
-
-registry:
-  registry:
-    image:
-      r
+    typ
