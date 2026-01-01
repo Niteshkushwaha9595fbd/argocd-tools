@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firefox
+  namespace: default
+  labels:
+    app: firefox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firefox
+  template:
+    metadata:
+      labels:
+        app: firefox
+    spec:
+      containers:
+        - name: firefox
+          image: jlesage/firefox:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5800
+              name: http
+          env:
+            - name: DISPLAY_WIDTH
+              value: "1366"
+            - name: DISPLAY_HEIGHT
+              value: "768"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: firefox
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: firefox
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5800
