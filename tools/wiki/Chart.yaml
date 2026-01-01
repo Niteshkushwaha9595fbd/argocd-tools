@@ -1,0 +1,26 @@
+annotations:
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: Upgraded `common` chart dependency to version 4.5.2
+apiVersion: v2
+appVersion: version-2.5.201
+dependencies:
+- name: common
+  repository: https://library-charts.k8s-at-home.com
+  version: 4.5.2
+description: Make documentation a joy to write using Wiki.js's beautiful and intuitive
+  interface!
+home: https://github.com/k8s-at-home/charts/tree/master/charts/stable/wikijs
+icon: https://static.requarks.io/logo/wikijs-butterfly.svg
+keywords:
+- wiki
+- wikijs
+kubeVersion: '>=1.16.0-0'
+maintainers:
+- email: rolf@berkenbosch.nl
+  name: rolfberkenbosch
+name: wikijs
+sources:
+- https://hub.docker.com/r/linuxserver/wikijs/
+- https://github.com/Requarks/wiki
+version: 6.4.2
