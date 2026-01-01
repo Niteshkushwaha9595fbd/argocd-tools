@@ -1,13 +1,12 @@
 image:
-  # switched to Docker Hub image to avoid missing ghcr tag; change back if you have a specific ghcr tag
-  repository: requarks/wiki
-  tag: latest
+  repository: ghcr.io/linuxserver/wikijs
+  tag: version-2.5.201
   pullPolicy: IfNotPresent
 
 env:
   TZ: UTC
   DB_TYPE: sqlite
-  DB_FILEPATH: /wiki/data/wiki.db
+  DB_FILEPATH: /config/db.sqlite
 
 service:
   main:
@@ -20,8 +19,8 @@ ingress:
     enabled: false
 
 persistence:
-  data:
+  config:
     enabled: true
-    mountPath: /wiki/data
+    mountPath: /config
     accessMode: ReadWriteOnce
-    size: 5Gi
+    size: 1Gi
