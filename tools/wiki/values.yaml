@@ -24,3 +24,24 @@ persistence:
     mountPath: /config
     accessMode: ReadWriteOnce
     size: 1Gi
+
+startupProbe:
+  tcpSocket:
+    port: 3000
+  initialDelaySeconds: 20    # Wait 20s before probing
+  periodSeconds: 10          # Probe every 10s
+  failureThreshold: 30       # Give ~5 minutes to start
+
+readinessProbe:
+  tcpSocket:
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+livenessProbe:
+  tcpSocket:
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
