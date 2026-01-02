@@ -28,9 +28,9 @@ persistence:
 startupProbe:
   tcpSocket:
     port: 3000
-  initialDelaySeconds: 20    # Wait 20s before probing
-  periodSeconds: 10          # Probe every 10s
-  failureThreshold: 30       # Give ~5 minutes to start
+  initialDelaySeconds: 40    # Wait 20s before probing
+  periodSeconds: 15          # Probe every 10s
+  failureThreshold: 40       # Give ~5 minutes to start
 
 readinessProbe:
   tcpSocket:
