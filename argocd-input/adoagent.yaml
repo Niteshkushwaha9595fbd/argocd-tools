@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wiki
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app.kubernetes.io/name: azdo-agents
+    app.kubernetes.io/part-of: devsecops-platform
+    app.kubernetes.io/category: registry
+    app.kubernetes.io/tier: platform
+    app.kubernetes.io/managed-by: argocd
+    environment: production
+    platform.io/wave: "one"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
+    targetRevision: main
+    path: tools/ado_agent
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: azdo-agents
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
+      - Validate=false
+      - PruneLast=true
+      - Replace=true
+      - ApplyOutOfSyncOnly=false
+      - RespectIgnoreDifferences=false
+      - ServerSideApply=false
+    retry:
+      limit: 5
+      backoff:
+        duration: "5s"
+        factor: 2
+        maxDuration: "3m"
+
+        
