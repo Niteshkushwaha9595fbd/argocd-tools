@@ -18,7 +18,7 @@ spec:
       - name: azdo-agent
         # Switched to Docker Hub image per request (microsoft/azure-pipelines-vsts-agent)
         # Using explicit docker.io prefix to ensure Docker Hub is used.
-        image: docker.io/niteshkushwaha95/azure-devops-agent:1.0.0
+        image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
         env:
         - name: AZP_URL

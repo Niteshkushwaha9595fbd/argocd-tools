@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
   labels:
-    app.kubernetes.io/name: azdo-agents
+    app.kubernetes.io/name: azure-devops-agents
     app.kubernetes.io/part-of: devsecops-platform
     app.kubernetes.io/category: registry
     app.kubernetes.io/tier: platform
@@ -23,7 +23,7 @@ spec:
     path: tools/ado_agent
   destination:
     server: https://kubernetes.default.svc
-    namespace: azdo-agents
+    namespace: azure-devops-agents
   syncPolicy:
     automated:
       prune: true
