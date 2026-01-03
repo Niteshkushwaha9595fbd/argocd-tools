@@ -9,8 +9,9 @@ spec:
       restartPolicy: Never
       containers:
       - name: azdo-agent
-        # Docker Hub / GitHub Container Registry stable agent image
-        image: mcr.microsoft.com/azure-pipelines/azure-pipelines-agent:ubuntu-20.04
+        # Corrected Azure Pipelines agent image path. If this still fails,
+        # replace with a known working tag from your registry (or a public image).
+        image: mcr.microsoft.com/azure-pipelines/agent:ubuntu-20.04
         imagePullPolicy: IfNotPresent
         env:
         - name: AZP_URL
