@@ -1,32 +1,55 @@
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: azdo-agent
-#   namespace: azdo-agents
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: azdo-agent
-#   template:
-#     metadata:
-#       labels:
-#         app: azdo-agent
-#     spec:
-#       containers:
-#       - name: azdo-agent
-#         image: mcr.microsoft.com/azure-pipelines/azure-pipelines-agent:ubuntu-20.04
-#         env:
-#         - name: AZP_URL
-#           value: https://dev.azure.com/ORG_NAME
-#         - name: AZP_POOL
-#           value: kubernetes-pool
-#         - name: AZP_AGENT_NAME
-#           valueFrom:
-#             fieldRef:
-#               fieldPath: metadata.name
-#         - name: AZP_TOKEN
-#           valueFrom:
-#             secretKeyRef:
-#               name: azdo-agent-secret
-#               key: AZP_TOKEN
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-devops-agent
+  namespace: azure-devops-agents
+spec:
+  replicas: 2  # adjust based on load
+  selector:
+    matchLabels:
+      app: azdo-agent
+  template:
+    metadata:
+      labels:
+        app: azdo-agent
+    spec:
+      serviceAccountName: default  # can create dedicated SA
+      containers:
+      - name: azdo-agent
+        image: mcr.microsoft.com/azure-pipelines/vsts-agent:ubuntu-20.04
+        env:
+        - name: AZP_URL
+          valueFrom:
+            secretKeyRef:
+              name: azdo-agent-secret
+              key: AZP_URL
+        - name: AZP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: azdo-agent-secret
+              key: AZP_TOKEN
+        - name: AZP_POOL
+          valueFrom:
+            secretKeyRef:
+              name: azdo-agent-secret
+              key: AZP_POOL
+        - name: AZP_AGENT_NAME
+          value: "k8s-agent-$(HOSTNAME)"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        # ----- Health Checks -----
+        livenessProbe:
+          exec:
+            command: ["bash", "-c", "ps aux | grep 'Agent.Listener'"]
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          exec:
+            command: ["bash", "-c", "ps aux | grep 'Agent.Listener'"]
+          initialDelaySeconds: 15
+          periodSeconds: 30

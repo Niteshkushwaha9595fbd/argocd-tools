@@ -1,29 +1,29 @@
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: azdo-agent
-  namespace: azdo-agents
-spec:
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-      - name: azdo-agent
-        # Corrected Azure Pipelines agent image path. If this still fails,
-        # replace with a known working tag from your registry (or a public image).
-        image: mcr.microsoft.com/azure-pipelines/agent:ubuntu-20.04
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: AZP_URL
-          value: https://dev.azure.com/ORG_NAME
-        - name: AZP_POOL
-          value: kubernetes-pool
-        - name: AZP_AGENT_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: AZP_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: azdo-agent-secret
-              key: AZP_TOKEN
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: azdo-agent
+#   namespace: azdo-agents
+# spec:
+#   template:
+#     spec:
+#       restartPolicy: Never
+#       containers:
+#       - name: azdo-agent
+#         # Corrected Azure Pipelines agent image path. If this still fails,
+#         # replace with a known working tag from your registry (or a public image).
+#         image: mcr.microsoft.com/azure-pipelines/agent:ubuntu-20.04
+#         imagePullPolicy: IfNotPresent
+#         env:
+#         - name: AZP_URL
+#           value: https://dev.azure.com/ORG_NAME
+#         - name: AZP_POOL
+#           value: kubernetes-pool
+#         - name: AZP_AGENT_NAME
+#           valueFrom:
+#             fieldRef:
+#               fieldPath: metadata.name
+#         - name: AZP_TOKEN
+#           valueFrom:
+#             secretKeyRef:
+#               name: azdo-agent-secret
+#               key: AZP_TOKEN
