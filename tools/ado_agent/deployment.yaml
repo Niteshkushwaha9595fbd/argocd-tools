@@ -16,9 +16,16 @@ spec:
       serviceAccountName: default  # can create dedicated SA
       containers:
       - name: azdo-agent
-        # corrected image path (use a public/tagged image or your private registry)
+        # Primary image (Microsoft Container Registry). If this is unavailable,
+        # you can switch to a Docker Hub image by uncommenting one of the
+        # alternatives below and removing/commenting the `mcr.microsoft.com` line.
         image: mcr.microsoft.com/azure-pipelines/agent:ubuntu-20.04
         imagePullPolicy: IfNotPresent
+        # Docker Hub alternatives (uncomment to use):
+        # image: microsoft/azure-pipelines-agent:ubuntu-20.04
+        # image: docker.io/microsoft/azure-pipelines-agent:ubuntu-20.04
+        # Community image example (if you maintain your own):
+        # image: myregistry.example.com/myorg/azure-pipelines-agent:ubuntu-20.04
         env:
         - name: AZP_URL
           valueFrom:
