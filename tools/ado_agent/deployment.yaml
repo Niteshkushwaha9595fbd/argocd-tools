@@ -4,7 +4,7 @@ metadata:
   name: azure-devops-agent
   namespace: azure-devops-agents
 spec:
-  replicas: 2  # adjust based on load
+  replicas: 2
   selector:
     matchLabels:
       app: azdo-agent
@@ -13,13 +13,19 @@ spec:
       labels:
         app: azdo-agent
     spec:
-      serviceAccountName: default  # can create dedicated SA
+      serviceAccountName: default
+
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+
       containers:
       - name: azdo-agent
-        # Switched to Docker Hub image per request (microsoft/azure-pipelines-vsts-agent)
-        # Using explicit docker.io prefix to ensure Docker Hub is used.
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
+
         env:
         - name: AZP_URL
           valueFrom:
@@ -38,6 +44,7 @@ spec:
               key: AZP_POOL
         - name: AZP_AGENT_NAME
           value: "k8s-agent-$(HOSTNAME)"
+
         resources:
           requests:
             cpu: "500m"
@@ -45,14 +52,15 @@ spec:
           limits:
             cpu: "1"
             memory: "2Gi"
-        # ----- Health Checks -----
+
         livenessProbe:
           exec:
-            command: ["bash", "-c", "ps aux | grep 'Agent.Listener'"]
-          initialDelaySeconds: 30
+            command: ["bash", "-c", "pgrep -f Agent.Listener"]
+          initialDelaySeconds: 60
           periodSeconds: 60
+
         readinessProbe:
           exec:
-            command: ["bash", "-c", "ps aux | grep 'Agent.Listener'"]
-          initialDelaySeconds: 15
+            command: ["bash", "-c", "pgrep -f Agent.Listener"]
+          initialDelaySeconds: 30
           periodSeconds: 30
