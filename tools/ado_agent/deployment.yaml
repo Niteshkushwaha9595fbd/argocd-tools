@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: azdo-agent
-        image: mcr.microsoft.com/azure-pipelines/vsts-agent:ubuntu-22.04
+        image: mcr.microsoft.com/azure-pipelines/vsts-agent:latest
         env:
         - name: AZP_URL
           value: https://dev.azure.com/ORG_NAME
