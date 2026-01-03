@@ -9,12 +9,18 @@ spec:
       restartPolicy: Never
       containers:
       - name: azdo-agent
-        image: mcr.microsoft.com/azure-pipelines/azure-pipelines-agent:ubuntu-20.04
+        # Docker Hub / GitHub Container Registry stable agent image
+        image: ghcr.io/microsoft/azure-pipelines-agent:ubuntu-20.04
+        imagePullPolicy: IfNotPresent
         env:
         - name: AZP_URL
           value: https://dev.azure.com/ORG_NAME
         - name: AZP_POOL
           value: kubernetes-pool
+        - name: AZP_AGENT_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: AZP_TOKEN
           valueFrom:
             secretKeyRef:
