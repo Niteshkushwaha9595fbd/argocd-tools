@@ -16,7 +16,9 @@ spec:
       serviceAccountName: default  # can create dedicated SA
       containers:
       - name: azdo-agent
-        image: mcr.microsoft.com/azure-pipelines/vsts-agent:ubuntu-20.04
+        # corrected image path (use a public/tagged image or your private registry)
+        image: mcr.microsoft.com/azure-pipelines/agent:ubuntu-20.04
+        imagePullPolicy: IfNotPresent
         env:
         - name: AZP_URL
           valueFrom:
