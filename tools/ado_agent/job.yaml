@@ -10,7 +10,7 @@ spec:
       containers:
       - name: azdo-agent
         # Docker Hub / GitHub Container Registry stable agent image
-        image: ghcr.io/microsoft/azure-pipelines-agent:ubuntu-20.04
+        image: mcr.microsoft.com/azure-pipelines/azure-pipelines-agent:ubuntu-20.04
         imagePullPolicy: IfNotPresent
         env:
         - name: AZP_URL
