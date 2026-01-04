@@ -15,9 +15,12 @@ spec:
     spec:
       serviceAccountName: default
 
-      # Run agent as root to avoid permission issues
+      # Run as azp user (1000:1000) to match Dockerfile
       securityContext:
-        runAsNonRoot: false
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
 
       volumes:
         - name: azp-data
@@ -58,3 +61,10 @@ spec:
         livenessProbe:
           exec:
             command: ["bash", "-c", "pgrep -f Agent.Listener"]
+          initialDelaySeconds: 60
+          periodSeconds: 60
+        readinessProbe:
+          exec:
+            command: ["bash", "-c", "pgrep -f Agent.Listener"]
+          initialDelaySeconds: 30
+          periodSeconds: 30
