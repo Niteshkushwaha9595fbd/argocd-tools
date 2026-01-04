@@ -28,7 +28,7 @@ spec:
 
       containers:
         - name: azdo-agent
-          image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.1
+          image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
           imagePullPolicy: IfNotPresent
 
           volumeMounts:
