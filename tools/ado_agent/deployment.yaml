@@ -56,9 +56,10 @@ spec:
             cpu: "1"
             memory: "2Gi"
 
+        # Wait for DinD socket to be ready
         volumeMounts:
-          - name: docker-socket
-            mountPath: /var/run/docker.sock
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
 
         livenessProbe:
           exec:
