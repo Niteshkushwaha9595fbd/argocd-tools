@@ -22,6 +22,9 @@ spec:
         runAsNonRoot: true
 
       containers:
+      # =============================
+      # Main Azure DevOps Agent
+      # =============================
       - name: azdo-agent
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
@@ -53,9 +56,6 @@ spec:
             cpu: "1"
             memory: "2Gi"
 
-        # ----------------------------
-        # Docker socket mount
-        # ----------------------------
         volumeMounts:
           - name: docker-socket
             mountPath: /var/run/docker.sock
@@ -72,11 +72,23 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 30
 
-      # ----------------------------
-      # Host Docker socket volume
-      # ----------------------------
+      # =============================
+      # Sidecar: Docker DinD
+      # =============================
+      - name: dind
+        image: docker:24.0-dind
+        securityContext:
+          privileged: true
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+
+      # =============================
+      # Shared volume for Docker socket
+      # =============================
       volumes:
         - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
-            type: Socket
+          emptyDir: {}
