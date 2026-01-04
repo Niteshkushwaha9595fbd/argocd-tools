@@ -66,20 +66,4 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 30
 
-      - name: docker-engine
-        image: docker:24.0-dind
-        securityContext:
-          privileged: false
 
-        env:
-        - name: DOCKER_TLS_CERTDIR
-          value: ""
-        ports:
-        - containerPort: 2375
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "512Mi"
-          limits:
-            cpu: "500m"
-            memory: "1Gi"
