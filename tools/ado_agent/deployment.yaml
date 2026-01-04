@@ -53,6 +53,13 @@ spec:
             cpu: "1"
             memory: "2Gi"
 
+        # ----------------------------
+        # Docker socket mount
+        # ----------------------------
+        volumeMounts:
+          - name: docker-socket
+            mountPath: /var/run/docker.sock
+
         livenessProbe:
           exec:
             command: ["bash", "-c", "pgrep -f Agent.Listener"]
@@ -64,3 +71,12 @@ spec:
             command: ["bash", "-c", "pgrep -f Agent.Listener"]
           initialDelaySeconds: 30
           periodSeconds: 30
+
+      # ----------------------------
+      # Host Docker socket volume
+      # ----------------------------
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
