@@ -22,6 +22,10 @@ spec:
       volumes:
         - name: azp-data
           emptyDir: {}
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
 
       containers:
       - name: azdo-agent
@@ -30,6 +34,8 @@ spec:
         volumeMounts:
           - name: azp-data
             mountPath: /azp
+          - name: docker-sock
+            mountPath: /var/run/docker.sock  # Mount host Docker socket
         env:
           - name: AZP_URL
             valueFrom:
@@ -48,6 +54,8 @@ spec:
                 key: AZP_POOL
           - name: AZP_AGENT_NAME
             value: "k8s-agent-$(HOSTNAME)"
+          - name: DOCKER_HOST
+            value: unix:///var/run/docker.sock  # Use host Docker
         resources:
           requests:
             cpu: "200m"
