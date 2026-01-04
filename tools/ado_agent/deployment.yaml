@@ -19,14 +19,6 @@ spec:
       securityContext:
         runAsNonRoot: false
 
-      volumes:
-        - name: azp-data
-          emptyDir: {}
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
-            type: Socket
-
       containers:
       - name: azdo-agent
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
