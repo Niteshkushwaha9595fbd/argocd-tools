@@ -15,39 +15,14 @@ spec:
     spec:
       serviceAccountName: default
 
-      # ----------------------------
       # Main pod security context
-      # ----------------------------
       securityContext:
-        runAsNonRoot: false
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
-
-      # =============================
-      # Init container to install dependencies
-      # =============================
-      initContainers:
-      - name: init-dependencies
-        image: ubuntu:20.04
-        command:
-          - bash
-          - -c
-          - |
-            apt-get update && \
-            apt-get install -y --no-install-recommends \
-              liblttng-ust0 liblttng-ust-ctl4 libnuma1 liburcu6 \
-              libssl1.1 libicu66 xz-utils curl && \
-            rm -rf /var/lib/apt/lists/*
-        securityContext:
-          runAsUser: 0
-          runAsGroup: 0
-          privileged: true
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
 
       containers:
-      # =============================
-      # Main Azure DevOps Agent
-      # =============================
       - name: azdo-agent
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
@@ -71,7 +46,7 @@ spec:
         - name: AZP_AGENT_NAME
           value: "k8s-agent-$(HOSTNAME)"
         - name: DOCKER_HOST
-          value: tcp://localhost:2375  # Connect to DinD TCP socket
+          value: tcp://localhost:2375
 
         resources:
           requests:
@@ -93,18 +68,15 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 30
 
-      # =============================
-      # Sidecar: Docker Engine (DinD TCP)
-      # =============================
       - name: docker-engine
         image: docker:24.0-dind
         securityContext:
-          privileged: true   # Required for DinD TCP
+          privileged: true
           runAsUser: 0
           runAsGroup: 0
         env:
         - name: DOCKER_TLS_CERTDIR
-          value: ""          # Disable TLS for TCP
+          value: ""
         ports:
         - containerPort: 2375
         resources:
