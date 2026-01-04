@@ -15,37 +15,39 @@ spec:
     spec:
       serviceAccountName: default
 
-      # Main pod security context
+      # Pod runs as root to avoid permission issues
       securityContext:
         runAsNonRoot: false
 
+      volumes:
+        - name: azp-data
+          emptyDir: {}
 
       containers:
       - name: azdo-agent
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
-
+        volumeMounts:
+          - name: azp-data
+            mountPath: /azp
         env:
-        - name: AZP_URL
-          valueFrom:
-            secretKeyRef:
-              name: azdo-agent-secret
-              key: AZP_URL
-        - name: AZP_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: azdo-agent-secret
-              key: AZP_TOKEN
-        - name: AZP_POOL
-          valueFrom:
-            secretKeyRef:
-              name: azdo-agent-secret
-              key: AZP_POOL
-        - name: AZP_AGENT_NAME
-          value: "k8s-agent-$(HOSTNAME)"
-        # - name: DOCKER_HOST
-        #   value: tcp://localhost:2375
-
+          - name: AZP_URL
+            valueFrom:
+              secretKeyRef:
+                name: azdo-agent-secret
+                key: AZP_URL
+          - name: AZP_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: azdo-agent-secret
+                key: AZP_TOKEN
+          - name: AZP_POOL
+            valueFrom:
+              secretKeyRef:
+                name: azdo-agent-secret
+                key: AZP_POOL
+          - name: AZP_AGENT_NAME
+            value: "k8s-agent-$(HOSTNAME)"
         resources:
           requests:
             cpu: "200m"
@@ -53,17 +55,13 @@ spec:
           limits:
             cpu: "500m"
             memory: "1Gi"
-
         livenessProbe:
           exec:
             command: ["bash", "-c", "pgrep -f Agent.Listener"]
           initialDelaySeconds: 60
           periodSeconds: 60
-
         readinessProbe:
           exec:
             command: ["bash", "-c", "pgrep -f Agent.Listener"]
           initialDelaySeconds: 30
           periodSeconds: 30
-
-
