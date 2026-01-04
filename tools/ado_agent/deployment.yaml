@@ -31,6 +31,43 @@ spec:
           image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
           imagePullPolicy: IfNotPresent
 
+          # Explicit entrypoint override
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+              echo "🚀 Starting Azure DevOps Agent container..."
+
+              # Fix ownership at runtime (important for mounted volumes)
+              chown -R azp:azp /azp
+
+              # 1. Validate env
+              if [ -z "$AZP_URL" ] || [ -z "$AZP_TOKEN" ] || [ -z "$AZP_POOL" ]; then 
+                echo "❌ AZP_URL, AZP_TOKEN, AZP_POOL must be set"
+                exit 1
+              fi
+
+              cd /azp
+
+              # 2. Configure agent
+              if [ ! -f ".agent" ]; then
+                echo "🛠️ Configuring Azure DevOps Agent..."
+                ./config.sh --unattended \
+                  --url "$AZP_URL" \
+                  --auth pat \
+                  --token "$AZP_TOKEN" \
+                  --pool "$AZP_POOL" \
+                  --agent "$AZP_AGENT_NAME" \
+                  --replace \
+                  --acceptTeeEula
+                # 🔧 Fix ownership of newly created files 
+                chown -R azp:azp /azp
+              fi
+
+              # 3. Run agent
+              echo "🎯 Starting agent..."
+              exec ./run.sh
+
           volumeMounts:
             - name: azp-work
               mountPath: /azp/_work
@@ -54,7 +91,9 @@ spec:
                   name: azdo-agent-secret
                   key: AZP_POOL
             - name: AZP_AGENT_NAME
-              value: "k8s-agent-$(HOSTNAME)"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name   # pod name as agent name
 
           resources:
             requests:
