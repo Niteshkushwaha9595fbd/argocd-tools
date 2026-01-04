@@ -23,7 +23,7 @@ spec:
         fsGroup: 1000
 
       volumes:
-        - name: azp-data
+        - name: azp-work
           emptyDir: {}
 
       containers:
@@ -31,8 +31,8 @@ spec:
         image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
         imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: azp-data
-            mountPath: /azp
+          - name: azp-work
+            mountPath: /azp/_work   # Mount only workspace, not /azp
         env:
           - name: AZP_URL
             valueFrom:
