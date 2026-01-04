@@ -16,7 +16,7 @@ spec:
       serviceAccountName: default
 
       # ----------------------------
-      # Run agent as non-root
+      # Main pod security context
       # ----------------------------
       securityContext:
         runAsNonRoot: true
@@ -55,11 +55,11 @@ spec:
 
         resources:
           requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
             cpu: "500m"
             memory: "1Gi"
-          limits:
-            cpu: "1"
-            memory: "2Gi"
 
         livenessProbe:
           exec:
@@ -79,18 +79,18 @@ spec:
       - name: docker-engine
         image: docker:24.0-dind
         securityContext:
-          privileged: true   # Required for DinD
+          privileged: true   # Required for DinD TCP
           runAsUser: 0
           runAsGroup: 0
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""          # Disable TLS for TCP
         ports:
-        - containerPort: 2375  # Expose TCP socket
+        - containerPort: 2375
         resources:
           requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
             cpu: "500m"
             memory: "1Gi"
-          limits:
-            cpu: "1"
-            memory: "2Gi"
