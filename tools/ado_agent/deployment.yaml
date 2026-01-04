@@ -17,7 +17,7 @@ spec:
 
       # Run as azp user (1000:1000) to match Dockerfile
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
