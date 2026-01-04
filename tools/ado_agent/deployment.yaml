@@ -23,15 +23,19 @@ spec:
       volumes:
         - name: azp-work
           emptyDir: {}
+        - name: azp-diag
+          emptyDir: {}
 
       containers:
         - name: azdo-agent
-          image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
+          image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.1
           imagePullPolicy: IfNotPresent
 
           volumeMounts:
             - name: azp-work
               mountPath: /azp/_work
+            - name: azp-diag
+              mountPath: /azp/_diag
 
           env:
             - name: AZP_URL
