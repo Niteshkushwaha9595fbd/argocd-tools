@@ -69,9 +69,8 @@ spec:
       - name: docker-engine
         image: docker:24.0-dind
         securityContext:
-          privileged: true
-          runAsUser: 0
-          runAsGroup: 0
+          privileged: false
+
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
