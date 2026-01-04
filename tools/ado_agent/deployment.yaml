@@ -24,6 +24,26 @@ spec:
         runAsGroup: 0
         fsGroup: 0
 
+      # =============================
+      # Init container to install dependencies
+      # =============================
+      initContainers:
+      - name: init-dependencies
+        image: ubuntu:20.04
+        command:
+          - bash
+          - -c
+          - |
+            apt-get update && \
+            apt-get install -y --no-install-recommends \
+              liblttng-ust0 liblttng-ust-ctl4 libnuma1 liburcu6 \
+              libssl3 libicu66 xz-utils curl && \
+            rm -rf /var/lib/apt/lists/*
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          privileged: true
+
       containers:
       # =============================
       # Main Azure DevOps Agent
