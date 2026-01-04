@@ -15,11 +15,14 @@ spec:
     spec:
       serviceAccountName: default
 
+      # ----------------------------
+      # Run as root for proper permissions
+      # ----------------------------
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        runAsNonRoot: true
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+        runAsNonRoot: false
 
       containers:
       # =============================
@@ -56,10 +59,25 @@ spec:
             cpu: "1"
             memory: "2Gi"
 
-        # Wait for DinD socket to be ready
+        # ----------------------------
+        # Mount host Docker socket
+        # ----------------------------
         volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock
+
+        # ----------------------------
+        # Wait for socket (optional script in entrypoint)
+        # ----------------------------
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          while [ ! -S /var/run/docker.sock ]; do
+            echo "Waiting for Docker socket..."
+            sleep 2
+          done
+          echo "Docker socket ready, starting agent..."
+          exec /azp/entrypoint.sh
 
         livenessProbe:
           exec:
@@ -88,8 +106,10 @@ spec:
           mountPath: /var/run/docker.sock
 
       # =============================
-      # Shared volume for Docker socket
+      # Shared hostPath for Docker socket
       # =============================
       volumes:
         - name: docker-socket
-          emptyDir: {}
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
