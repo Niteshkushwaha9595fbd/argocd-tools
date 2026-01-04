@@ -15,11 +15,11 @@ spec:
     spec:
       serviceAccountName: default
 
-      # ✅ Run as ROOT (important)
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
 
       volumes:
         - name: azp-work
@@ -30,7 +30,6 @@ spec:
           image: docker.io/niteshkushwaha95/azure-devops-agent:arm64-1.0.0
           imagePullPolicy: IfNotPresent
 
-          # ✅ ONLY mount workspace
           volumeMounts:
             - name: azp-work
               mountPath: /azp/_work
@@ -61,15 +60,3 @@ spec:
             limits:
               cpu: "500m"
               memory: "1Gi"
-
-          livenessProbe:
-            exec:
-              command: ["bash", "-c", "pgrep -f Agent.Listener"]
-            initialDelaySeconds: 60
-            periodSeconds: 60
-
-          readinessProbe:
-            exec:
-              command: ["bash", "-c", "pgrep -f Agent.Listener"]
-            initialDelaySeconds: 30
-            periodSeconds: 30
