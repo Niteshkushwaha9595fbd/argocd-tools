@@ -16,7 +16,7 @@ spec:
       serviceAccountName: default
 
       # ----------------------------
-      # Run as root for proper permissions
+      # Run as root (needed for DinD TCP)
       # ----------------------------
       securityContext:
         runAsUser: 0
@@ -50,6 +50,8 @@ spec:
               key: AZP_POOL
         - name: AZP_AGENT_NAME
           value: "k8s-agent-$(HOSTNAME)"
+        - name: DOCKER_HOST
+          value: tcp://localhost:2375  # Connect to DinD TCP socket
 
         resources:
           requests:
@@ -58,26 +60,6 @@ spec:
           limits:
             cpu: "1"
             memory: "2Gi"
-
-        # ----------------------------
-        # Mount host Docker socket
-        # ----------------------------
-        volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-
-        # ----------------------------
-        # Wait for socket (optional script in entrypoint)
-        # ----------------------------
-        command: ["/bin/bash", "-c"]
-        args:
-        - |
-          while [ ! -S /var/run/docker.sock ]; do
-            echo "Waiting for Docker socket..."
-            sleep 2
-          done
-          echo "Docker socket ready, starting agent..."
-          exec /azp/entrypoint.sh
 
         livenessProbe:
           exec:
@@ -92,24 +74,21 @@ spec:
           periodSeconds: 30
 
       # =============================
-      # Sidecar: Docker DinD
+      # Sidecar: Docker Engine (DinD TCP)
       # =============================
-      - name: dind
+      - name: docker-engine
         image: docker:24.0-dind
         securityContext:
-          privileged: true
+          privileged: true  # Required for DinD
         env:
         - name: DOCKER_TLS_CERTDIR
-          value: ""
-        volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-
-      # =============================
-      # Shared hostPath for Docker socket
-      # =============================
-      volumes:
-        - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
-            type: Socket
+          value: ""          # Disable TLS for TCP
+        ports:
+        - containerPort: 2375  # Expose TCP socket
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
