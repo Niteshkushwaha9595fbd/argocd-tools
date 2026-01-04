@@ -43,8 +43,8 @@ spec:
               key: AZP_POOL
         - name: AZP_AGENT_NAME
           value: "k8s-agent-$(HOSTNAME)"
-        - name: DOCKER_HOST
-          value: tcp://localhost:2375
+        # - name: DOCKER_HOST
+        #   value: tcp://localhost:2375
 
         resources:
           requests:
