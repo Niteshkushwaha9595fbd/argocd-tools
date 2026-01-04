@@ -16,13 +16,13 @@ spec:
       serviceAccountName: default
 
       # ----------------------------
-      # Run as root (needed for DinD TCP)
+      # Run agent as non-root
       # ----------------------------
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
-        runAsNonRoot: false
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
 
       containers:
       # =============================
@@ -79,7 +79,9 @@ spec:
       - name: docker-engine
         image: docker:24.0-dind
         securityContext:
-          privileged: true  # Required for DinD
+          privileged: true   # Required for DinD
+          runAsUser: 0
+          runAsGroup: 0
         env:
         - name: DOCKER_TLS_CERTDIR
           value: ""          # Disable TLS for TCP
