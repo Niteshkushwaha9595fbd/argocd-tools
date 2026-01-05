@@ -1,0 +1,87 @@
+apiVersion:v1
+kind:ConfigMap
+metadata:
+  name:docker-daemon-config
+  namespace:azure-devops-agents
+  labels:
+    app:docker-permanent-docker-daemon
+data:
+  daemon.json: |
+    {
+      "features": {
+        "buildkit": true
+      },
+      "log-driver": "json-file",
+      "log-opts": {
+        "max-size": "10m",
+        "max-file": "3"
+      }
+      "builder": {
+        "gc": {
+          "defaultKeepStorage": "20GB",
+          "policy": [
+            {
+              "keepStorage": "15GB", "filter": [ "unused-for=720h" ],
+              
+            }
+          ]
+        }
+      },
+      "default-runtime": "runc",
+      "no-new-privileges": true,
+      "maxconcurrentdownloads": 10,
+      "maxconcurrentuploads": 10,
+      "registry-mirrors": [],
+      "insecure-registries": []
+    }
+
+-----
+apiVersion: apps/v1
+kind:statefulset
+metadata:
+  name:docker-permanent-docker-daemon
+  namespace:azure-devops-agents
+  labels:
+    app:docker-permanent-docker-daemon    
+spec:
+  dnsPolicy:ClusterFirst
+  securityContext:{}
+  containers:
+    - name:docker-daemon
+      image:docker:24.0.5-dind
+      image: docker.io/library/docker:24.0.5-dind
+      command: ['dockerd' ]
+      args:
+        - '--config-file=/etc/docker/daemon.json'
+        - '--host=Unix://var/run/docker.sock'
+        - '--host=tcp://0.0.0.0:2375'
+        - '--tls=false'
+        - '--storage-driver=overlay2'
+        - '--log-level=info'
+      securityContext:
+        privileged:true
+      resources:
+        requests:
+          memory:"512Mi"
+          cpu:"500m"
+
+      env:
+        - name:DOCKER_TLS_CERTDIR
+          value:""
+      ports:
+        - name: docker-api
+          containerPort:2375
+          protocol: TCP
+      volumeMounts:
+        - name: docker-daemon-config
+          mountPath: /etc/docker/daemon.json
+          subPath: daemon.json
+        - name: docker-storage
+          mountPath: /var/lib/docker
+        - name: var-run
+          mountPath: /var/run
+  volumes:
+    - name: docker-daemon-config
+      configMap:
+        name: docker-daemon-config
+    
