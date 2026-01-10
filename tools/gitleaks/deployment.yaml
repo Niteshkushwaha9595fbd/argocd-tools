@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gitleaks-scan
+  namespace: gitleaks
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: gitleaks
+        image: ghcr.io/gitleaks/gitleaks:latest
+        args:
+          - detect
+          - --source=/repo
+          - --exit-code=1
+          - --report-format=json
+          - --report-path=/report/gitleaks-report.json
+        volumeMounts:
+        - name: repo
+          mountPath: /repo
+        - name: report
+          mountPath: /report
+      restartPolicy: Never
+      volumes:
+      - name: repo
+        emptyDir: {}
+      - name: report
+        emptyDir: {}
