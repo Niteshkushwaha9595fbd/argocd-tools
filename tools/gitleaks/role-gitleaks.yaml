@@ -1,12 +1,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: gitleaks-job-runner
-  namespace: gitleaks
 rules:
 - apiGroups: ["batch"]
   resources: ["jobs"]
   verbs: ["get", "list", "create", "delete", "watch"]
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["get", "list", "logs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get", "list"]
