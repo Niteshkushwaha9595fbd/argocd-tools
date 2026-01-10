@@ -1,13 +1,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: azure-devops-agent-rolebinding
+  name: gitleaks-job-runner-binding
   namespace: gitleaks
 subjects:
-  - kind: ServiceAccount
-    name: default  # your agent's service account
-    namespace: azure-devops-agents
+- kind: ServiceAccount
+  name: default
+  namespace: azure-devops-agents   # <--- ye tumhare pipeline agent ka SA hona chahiye
 roleRef:
   kind: Role
-  name: azure-devops-agent-role
+  name: gitleaks-job-runner
   apiGroup: rbac.authorization.k8s.io
