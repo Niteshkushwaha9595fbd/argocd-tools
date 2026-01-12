@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/tier: platform
     app.kubernetes.io/managed-by: argocd
     environment: production
-    platform.io/wave: "one"
+    platform.io/wave: "zero"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -21,7 +21,6 @@ spec:
     repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
     targetRevision: main
     path: tools/trivy-operator
-    namespace: trivy-operator 
   destination:
     server: https://kubernetes.default.svc
     namespace: trivy-operator
