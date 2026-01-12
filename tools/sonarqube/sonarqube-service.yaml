@@ -7,9 +7,10 @@ metadata:
     app: sonarqube-server
 spec:
   type: ClusterIP
+  selector:
+    app: sonarqube-server
   ports:
     - name: http
       port: 9000
       targetPort: 9000
       protocol: TCP
-
