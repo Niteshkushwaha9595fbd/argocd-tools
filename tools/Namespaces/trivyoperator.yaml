@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trivy-operator
+  annotations:
+    deployment.kubernetes.io/priority: "1"
+  labels:
+    name: triy-operator
+    environment: production
