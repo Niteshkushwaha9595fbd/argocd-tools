@@ -22,7 +22,7 @@ spec:
         fsGroup: 999
       containers:
         - name: sonarqube
-          image: sonarqube:10-community
+          image: sonarqube:26.1.0.118079-community
           ports:
             - containerPort: 9000
           env:
