@@ -20,7 +20,8 @@ spec:
   source:
     repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
     targetRevision: main
-    path: tools/trivy-operator  
+    path: tools/trivy-operator
+    namespace: trivy-operator 
   destination:
     server: https://kubernetes.default.svc
     namespace: trivy-operator
