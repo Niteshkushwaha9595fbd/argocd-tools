@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sonarqube
+  name: trivy-operator
   namespace: trivy-operator
   annotations:
     argocd.argoproj.io/sync-wave: "0"
