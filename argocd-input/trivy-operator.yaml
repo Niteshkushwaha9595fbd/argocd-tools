@@ -2,38 +2,43 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: trivy-operator
-  namespace: trivy-operator
+  namespace: argocd
   annotations:
+    # CRDs ke liye important (MOST IMPORTANT)
+    argocd.argoproj.io/sync-options: Replace=true
+
+    # Sync order control (CRDs first use-case)
     argocd.argoproj.io/sync-wave: "0"
   labels:
     app.kubernetes.io/name: trivy-operator
     app.kubernetes.io/part-of: devsecops-platform
-    app.kubernetes.io/category: registry
+    app.kubernetes.io/category: security
     app.kubernetes.io/tier: platform
     app.kubernetes.io/managed-by: argocd
     environment: production
-    platform.io/wave: "zero"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+
   source:
     repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
     targetRevision: main
     path: tools/trivy-operator
+
   destination:
     server: https://kubernetes.default.svc
-    namespace: trivy-operator
+    namespace: trivy-system
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-      enabled: true
     syncOptions:
       - CreateNamespace=true
       - Validate=false
-      - PruneLast=true
       - Replace=true
+      - PruneLast=true
       - ApplyOutOfSyncOnly=false
       - RespectIgnoreDifferences=false
       - ServerSideApply=false
@@ -43,5 +48,3 @@ spec:
         duration: "5s"
         factor: 2
         maxDuration: "3m"
-
-        
