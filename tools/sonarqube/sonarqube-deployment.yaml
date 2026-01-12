@@ -17,8 +17,9 @@ spec:
       labels:
         app: sonarqube-server
     spec:
+      # ✅ runAsUser/runAsGroup हटाए गए, सिर्फ fsGroup रखा गया
       securityContext:
-        fsGroup: 999   # ✅ केवल volumes के लिए ownership fix
+        fsGroup: 999
       containers:
         - name: sonarqube
           image: sonarqube:10-community
@@ -58,6 +59,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           volumeMounts:
+            # ✅ सिर्फ data/extensions/logs पर PVC mount, entrypoint वाली directory untouched रहेगी
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
             - name: sonarqube-extensions
