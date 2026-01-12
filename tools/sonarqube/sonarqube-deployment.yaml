@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,9 +18,7 @@ spec:
         app: sonarqube-server
     spec:
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        fsGroup: 999   # ✅ केवल volumes के लिए ownership fix
       containers:
         - name: sonarqube
           image: sonarqube:10-community
