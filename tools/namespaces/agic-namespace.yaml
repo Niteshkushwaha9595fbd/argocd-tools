@@ -2,3 +2,10 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: ingress-azure
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/name: ingress-azure
+  annotations:
+    kubernetes.io/description: "Namespace for Vault components"
+
+
