@@ -43,3 +43,8 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - pruneLast=true
+          - respectIgnoreDifferences=true
+          - serverSideApply=true
+          - ApplyOutOfSyncOnly=true
+
