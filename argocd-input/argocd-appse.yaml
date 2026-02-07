@@ -26,11 +26,16 @@ spec:
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: '{{syncwave}}'
-        argocd.argoproj.io/category: '{{category}}'
-        argocd.argoproj.io/tier: '{{tier}}'
+      labels:
+        app.kubernetes.io/managed-by: argocd  
+        app.kubernetes.io/name : '{{name}}' 
+        app.kubernetes.io/category: '{{category}}'
+        app.kubernetes.io/tier: '{{tier}}'
     spec:
       project: default
       source:
+        repoURL: https://github.com/Niteshkushwaha9595fbd/argocd-tools.git
+        targetRevision: main
         # If element includes 'path' (manifests), use that; otherwise use Helm chart fields
         path: '{{path}}'
       destination:
