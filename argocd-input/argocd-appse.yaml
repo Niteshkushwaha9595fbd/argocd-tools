@@ -23,7 +23,12 @@ spec:
             tier: critical
   template:
     metadata:
-      name: '{{name}}-app'
+      name: '{{name}}'
+      namespcace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncwave}}'
+        argocd.argoproj.io/category: '{{category}}'
+        argocd.argoproj.io/tier: '{{tier}}'
     spec:
       project: default
       source:
