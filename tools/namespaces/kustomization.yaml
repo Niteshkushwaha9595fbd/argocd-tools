@@ -1,19 +1,12 @@
-# apiVersion: kustomize.config.k8s.io/v1beta1
-# kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-# # resources included in this kustomization
-# resources:
-#   - agic-namespace.yaml
-#   - deployment.yaml
-#   - clusterrole.yaml
-#   - clusterrolebinding.yaml
-#   - sa.yaml
-#   - secret.yaml
+resources:
+	- harbor-namespace.yaml
+	- vault-namespace.yaml
+	- agic-namespace.yaml
 
-# # set namespace for all resources
-# namespace: ingress-azure
-
-# commonLabels:
-#   app.kubernetes.io/managed-by: argocd
-#   app.kubernetes.io/component: agic
+commonLabels:
+	app.kubernetes.io/managed-by: argocd
+	app.kubernetes.io/component: namespaces
 
