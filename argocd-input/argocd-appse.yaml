@@ -10,21 +10,19 @@ spec:
           # namespace 
           - name: namespaces
             path: tools/namespaces
-            namespace: ""
             syncwave: "0"
             category: infrastructure
             tier: critical
           # AGIC Helm chart
           - name: agic
             path: tools/agic
-            namespace: ""
             syncwave: "1"
             category: infrastructure
             tier: critical
   template:
     metadata:
       name: '{{name}}'
-      namespcace: argocd
+      namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: '{{syncwave}}'
         argocd.argoproj.io/category: '{{category}}'
@@ -36,7 +34,7 @@ spec:
         path: '{{path}}'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: '{{namespace}}'
+        namespace: '{{name}}'
       syncPolicy:
         automated:
           prune: true
