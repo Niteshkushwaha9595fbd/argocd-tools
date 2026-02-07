@@ -12,4 +12,3 @@ rules:
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingressclasses"]
   verbs: ["get", "list", "watch"]
----
