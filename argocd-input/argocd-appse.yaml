@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: harbor-vault-applicationset
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # namespace 
+          - name: namespaces
+            path: tools/namespaces
+            namespace: ""
+            syncwave: "0"
+            category: infrastructure
+            tier: critical
+          # AGIC Helm chart
+          - name: agic
+            path: tools/agic
+            namespace: ""
+            syncwave: "1"
+            category: infrastructure
+            tier: critical
+  template:
+    metadata:
+      name: '{{name}}-app'
+    spec:
+      project: default
+      source:
+        # If element includes 'path' (manifests), use that; otherwise use Helm chart fields
+        path: '{{path}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

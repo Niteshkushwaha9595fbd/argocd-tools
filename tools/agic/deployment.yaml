@@ -1,0 +1,33 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-azure-pod
+  namespace: ingress-azure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-azure
+  template:
+    metadata:
+      labels:
+        app: ingress-azure
+    spec:
+      serviceAccountName: ingress-azure-sa
+      containers:
+      - name: ingress-azure
+        image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:1.7.2
+        args:
+          - --ingress-class=azure/application-gateway
+        env:
+        - name: APPGW_SUBSCRIPTION_ID
+          value: "<your-subscription-id>"
+        - name: APPGW_RESOURCE_GROUP
+          value: "<your-resource-group>"
+        - name: APPGW_NAME
+          value: "<your-appgw-name>"
+        - name: AKS_CLUSTER_NAME
+          value: "<your-aks-cluster-name>"
+        - name: AKS_RESOURCE_GROUP
+          value: "<your-aks-resource-group>"
