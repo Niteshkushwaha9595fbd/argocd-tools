@@ -21,6 +21,13 @@ spec:
             syncwave: "1"
             category: infrastructure
             tier: critical
+          # AGIC Helm chart
+          - name: harbor
+            path: tools/harbor
+            namepsace: ""
+            syncwave: "1"
+            category: infrastructure
+            tier: critical
   template:
     metadata:
       name: '{{name}}'
