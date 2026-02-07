@@ -10,3 +10,6 @@ subjects:
 - kind: ServiceAccount
   name: ingress-azure-sa
   namespace: ingress-azure
+- kind: Group
+  name: ingress-azure-group
+  apiGroup: rbac.authorization.k8s.io
