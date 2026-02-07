@@ -17,6 +17,7 @@ spec:
           # AGIC Helm chart
           - name: agic
             path: tools/agic
+            namepsace: ""
             syncwave: "1"
             category: infrastructure
             tier: critical
