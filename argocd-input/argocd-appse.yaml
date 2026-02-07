@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: harbor-vault-applicationset
+  name: argocd-app
   namespace: argocd
 spec:
   generators:
@@ -10,6 +10,7 @@ spec:
           # namespace 
           - name: namespaces
             path: tools/namespaces
+            namepsace: ""
             syncwave: "0"
             category: infrastructure
             tier: critical
