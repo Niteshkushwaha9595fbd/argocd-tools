@@ -17,9 +17,23 @@ spec:
       containers:
       - name: ingress-azure
         image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:1.7.2
+        imagePullPolicy: IfNotPresent
         args:
-          - --ingress-class=azure/application-gateway
+          - "--ingress-class=azure/application-gateway"
         envFrom:
-        - secretRef:
-            name: agic-secrets
-
+          - secretRef:
+              name: agic-secrets
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
