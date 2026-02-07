@@ -1,5 +1,5 @@
 expose:
-  # Set how to expose the service. Set the type as "ingress", "clusterIP", "nodePort" or "loadBalancer"
+  # Set how to expose the service. Set the type as "ingress", "clusterIP", "nodePort", "loadBalancer" or "route"
   # and fill the information in the corresponding section
   type: ingress
   tls:
@@ -51,14 +51,16 @@ expose:
   route:
     labels: {}
     annotations: {}
+    # References to the parent gateways
+    parentRefs: []
       # - name: envoy-internal
       #   namespace: networking
       #   sectionName: https
       #   group: gateway.networking.k8s.io
       #   kind: Gateway
-    parentRefs: {}
-      # - "harbor.example.com"
+    # The hostnames for the HTTPRoute
     hosts: []
+      # - "harbor.example.com"
   clusterIP:
     # The name of ClusterIP service
     name: harbor
@@ -498,13 +500,17 @@ containerSecurityContext:
 # If service exposed via "ingress", the Nginx will not be used
 nginx:
   image:
-    repository: goharbor/nginx-photon
-    tag: v2.14.1
+    repository: docker.io/goharbor/nginx-photon
+    tag: dev
   # set the service account to be used, default if left empty
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
   revisionHistoryLimit: 10
   # resources:
   #  requests:
@@ -529,13 +535,17 @@ nginx:
 
 portal:
   image:
-    repository: goharbor/harbor-portal
-    tag: v2.14.1
+    repository: docker.io/goharbor/harbor-portal
+    tag: dev
   # set the service account to be used, default if left empty
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
   revisionHistoryLimit: 10
   # resources:
   #  requests:
@@ -569,13 +579,17 @@ portal:
 
 core:
   image:
-    repository: goharbor/harbor-core
-    tag: v2.14.1
+    repository: docker.io/goharbor/harbor-core
+    tag: dev
   # set the service account to be used, default if left empty
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
   revisionHistoryLimit: 10
   ## Startup probe values
   startupProbe:
@@ -658,8 +672,15 @@ core:
 
 jobservice:
   image:
-    repository: goharbor/harbor-jobservice
-    tag: v2.14.1
+    repository: docker.io/goharbor/harbor-jobservice
+    tag: dev
+  replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+  revisionHistoryLimit: 10
+
   # set the service account to be used, default if left empty
   serviceAccountName: ""
   # mount the service account token
@@ -721,8 +742,8 @@ jobservice:
 registry:
   registry:
     image:
-      repository: goharbor/registry-photon
-      tag: v2.14.1
+      repository: docker.io/goharbor/registry-photon
+      tag: dev
     # resources:
     #  requests:
     #    memory: 256Mi
@@ -730,8 +751,8 @@ registry:
     extraEnvVars: []
   controller:
     image:
-      repository: goharbor/harbor-registryctl
-      tag: v2.14.1
+      repository: docker.io/goharbor/harbor-registryctl
+      tag: dev
     # resources:
     #  requests:
     #    memory: 256Mi
@@ -742,6 +763,10 @@ registry:
   # mount the service account token
   automountServiceAccountToken: false
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
   revisionHistoryLimit: 10
   nodeSelector: {}
   tolerations: []
@@ -783,7 +808,7 @@ registry:
     # If using existingSecret, the key must be REGISTRY_PASSWD and REGISTRY_HTPASSWD
     existingSecret: ""
     # Login and password in htpasswd string format. Excludes `registry.credentials.username`  and `registry.credentials.password`. May come in handy when integrating with tools like argocd or flux. This allows the same line to be generated each time the template is rendered, instead of the `htpasswd` function from helm, which generates different lines each time because of the salt.
-    # htpasswdString: $apr1$XLefHzeG$Xl4.s00sMSCCcMyJljSZb0 # example string
+    # htpasswdString: "harbor_registry_user:$2a$05$IPnI.TSgP8ek1/ESjkULVemA.A3nSXPdN80ljsmcun7FtE3ViSYUq" # example string, bcrypt is the only accepted hashing algorithm in htpasswd here.
     htpasswdString: ""
   middleware:
     enabled: false
@@ -810,15 +835,20 @@ trivy:
   enabled: true
   image:
     # repository the repository for Trivy adapter image
-    repository: goharbor/trivy-adapter-photon
+    repository: docker.io/goharbor/trivy-adapter-photon
     # tag the tag for Trivy adapter image
-    tag: v2.14.1
+    tag: dev
   # set the service account to be used, default if left empty
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
   # replicas the number of Pod replicas
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+
   resources:
     requests:
       cpu: 200m
@@ -910,17 +940,72 @@ trivy:
   timeout: 5m0s
 
 database:
-  # Using external database: internal DB components and init containers removed
-  type: external
+  # if external database is used, set "type" to "external"
+  # and fill the connection information in "external" section
+  type: internal
+  internal:
+    image:
+      repository: docker.io/goharbor/harbor-db
+      tag: dev
+    # set the service account to be used, default if left empty
+    serviceAccountName: ""
+    # mount the service account token
+    automountServiceAccountToken: false
+    # resources:
+    #  requests:
+    #    memory: 256Mi
+    #    cpu: 100m
+    # The timeout used in livenessProbe; 1 to 5 seconds
+    livenessProbe:
+      timeoutSeconds: 1
+    # The timeout used in readinessProbe; 1 to 5 seconds
+    readinessProbe:
+      timeoutSeconds: 1
+    extraEnvVars: []
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    ## The priority class to run the pod as
+    priorityClassName:
+    # containers to be run before the controller's container starts.
+    extrInitContainers: []
+    # Example:
+    #
+    # - name: wait
+    #   image: busybox
+    #   command: [ 'sh', '-c', "sleep 20" ]
+    # The initial superuser password for internal database
+    password: "changeit"
+    # The size limit for Shared memory, pgSQL use it for shared_buffer
+    # More details see:
+    # https://github.com/goharbor/harbor/issues/15034
+    shmSizeLimit: 512Mi
+    initContainer:
+      migrator: {}
+      # resources:
+      #  requests:
+      #    memory: 128Mi
+      #    cpu: 100m
+      permissions: {}
+      # resources:
+      #  requests:
+      #    memory: 128Mi
+      #    cpu: 100m
   external:
     host: "192.168.0.1"
     port: "5432"
     username: "user"
     password: "password"
-    coreDatabase: "harbor"
+    coreDatabase: "registry"
     # if using existing secret, the key must be "password"
     existingSecret: ""
-    # sslmode options: disable, require, verify-ca, verify-full
+    # "disable" - No SSL
+    # "require" - Always SSL (skip verification)
+    # "verify-ca" - Always SSL (verify that the certificate presented by the
+    # server was signed by a trusted CA)
+    # "verify-full" - Always SSL (verify that the certification presented by the
+    # server was signed by a trusted CA and the server host name matches the one
+    # in the certificate)
     sslmode: "disable"
   # The maximum number of connections in the idle connection pool per pod (core+exporter).
   # If it <=0, no idle connections are retained.
@@ -940,8 +1025,8 @@ redis:
   type: internal
   internal:
     image:
-      repository: goharbor/redis-photon
-      tag: v2.14.1
+      repository: docker.io/goharbor/redis-photon
+      tag: dev
     # set the service account to be used, default if left empty
     serviceAccountName: ""
     # mount the service account token
@@ -1010,12 +1095,16 @@ redis:
 
 exporter:
   image:
-    repository: goharbor/harbor-exporter
-    tag: v2.14.1
+    repository: docker.io/goharbor/harbor-exporter
+    tag: dev
   serviceAccountName: ""
   # mount the service account token
   automountServiceAccountToken: false
   replicas: 1
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
   revisionHistoryLimit: 10
   # resources:
   #  requests:

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/component: config
+  annotations:
+    description: "Argo CD configuration with GitHub OAuth and jqPathExpressions"
+    maintainer: "cloud-team@example.com"
+
+data:
+  # 1. Admin Access
+  admin.enable: "true"
+
+  # 2. Application Labeling
+  application.instanceLabelKey: argocd.argoproj.io/instance
+
+  # 3. Authentication via GitHub OAuth (Dex)
+  dex.config: |
+    connectors:
+    - type: github
+      id: github
+      name: GitHub
+      config:
+        clientID: $dex.github.clientID
+        clientSecret: $dex.github.clientSecret
+        redirectURI: https://argocd.example.com/api/dex/callback
+        orgs:
+        - name: my-github-org
+
+  # 4. Exec Disable
+  kustomize.buildOptions: "--disable-exec"
+
+  # 5. Resource Customizations (using jqPathExpressions)
+  resource.customizations.ignoreResourceUpdates: |
+    v1/ConfigMap:
+      jqPathExpressions:
+      - .metadata.annotations["cluster.kubernetes.io/last-updated"]
+      - .metadata.annotations["control-plane.alpha.kubernetes.io/leader"]
+
+  # 6. Resource Exclusions
+  resource.exclusions: |
+    - apiGroups:
+      - "apps"
+      kinds:
+      - "Deployment"
+      clusters:
+      - "test-cluster"
+
+  # 7. Timeouts
+  timeout.reconciliation: 180s
+  timeout.hard.reconciliation: 600s
+
+  # 8. RBAC Logs
+  rbac.log.enforce: "true"
+
+  # 9. Status Badge
+  statusbadge.enabled: "true"
+
+  # 10. Argo CD URL
+  url: https://argocd.example.com
+
+  # Extra: Disable sync impersonation
+  application.sync.impersonation.enabled: "false"
