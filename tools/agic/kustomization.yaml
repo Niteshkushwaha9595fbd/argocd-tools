@@ -5,7 +5,7 @@ resources:
 - deployment.yaml
 - secret.yaml
 
-namespace: ingress-azure
+namespace: kube-system
 
 images:
 - name: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress
