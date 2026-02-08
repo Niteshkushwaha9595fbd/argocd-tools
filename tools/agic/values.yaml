@@ -1,118 +1,119 @@
-# Verbosity level of the App Gateway Ingress Controller
-verbosityLevel: 3
+# Complete values.yaml for AGIC (merge of your provided values + required appgw and auth)
+# Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with your actual identity client id (for workload identity)
+# If you prefer using applicationGatewayID instead of subscription/resource/name, the applicationGatewayID field is already set.
 
-# Reconcile period is time period after which AGIC will re-configure Application Gateway if the current state differs from the expected state.
-# If not specified, periodic reconcile is turned off. Range: 30 - 300 (seconds)
-# reconcilePeriodSeconds: 30
+verbosityLevel: 3
 
 image:
   repository: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress
   tag: 1.9.4
   pullPolicy: Always
 
-
 kubernetes:
-
-  # Namespace(s) AGIC watches; Leaving this blank watches all namespaces;
-  # Accepts one or many comma-separated values
-  watchNamespace:
-
-  # Port for AGIC's HTTP API endpoint
+  # Leave empty to watch all namespaces
+  watchNamespace: ""
   httpServicePort: 8123
-
-  # Enables monitoring of MultiClusterIngress instead of Ingress resources
   multiClusterMode: false
-
-  # Specify the scheduling options
   nodeSelector: {}
-    # disktype: dentro
   tolerations: []
   affinity: {}
-
-  # Pod security context
   securityContext:
     runAsUser: 0
-
-  # Container security context
   containerSecurityContext: {}
-    #readOnlyRootFilesystem: true
-
-  # Add pod level annotations
   podAnnotations: {}
-
-  # Specify resource quota for agic pod
   resources: {}
-    #limits:
-    #  cpu: 200m
-    #  memory: 100Mi
-    #requests:
-    #  cpu: 100m
-    #  memory: 100Mi
-
-  # Add additional volumes and volume mounts to the pod
   volumes: {}
-    #extraVolumes:
-    #- name: tmp
-    #  emptyDir: {}
-    #extraVolumeMounts:
-    #- name: tmp
-    #  mountPath: /tmp
-
-  # Set this to override the default ingress class value. DEFAULT: azure/application-gateway
-  # This can be used to segregate ingress controllers in the same namespace
-  # ingressClass: agic-2
-
-  # Set Ingress class resource to use the IngressClass V1 resource with Ingress V1
   ingressClassResource:
     name: azure-application-gateway
     enabled: true
     default: false
     controllerValue: "azure/application-gateway"
 
-################################################################################
-# Specify which application gateway the ingress controller will manage
-# Specity which cloud environment will be used AZURECHINACLOUD,AZUREGERMANCLOUD,AZUREPUBLICCLOUD,AZUREUSGOVERNMENTCLOUD default: AZUREPUBLICCLOUD
-#
-appgw: {}
-#   environment: AZUREPUBLICCLOUD
-#   subscriptionId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-#   resourceGroup: myResourceGroup
-#   name: myApplicationGateway
-#   # Whether to force private IP for all the listeners on Application Gateway
-#   usePrivateIP: false
-#   subResourceNamePrefix: "myPrefix"
+# Application Gateway configuration
+appgw:
+  # Preferred: full resource id (uncomment to use)
+  applicationGatewayID: "/subscriptions/1c31cbbc-25c4-40cf-8e4e-44be901aa7ef/resourceGroups/pardeep-rg-0607/providers/Microsoft.Network/applicationGateways/applicationgateway"
 
-################################################################################
-# Specify the authentication with Azure Resource Manager
-#
-# Two authentication methods are available:
-# - Option 1: AAD-Pod-Identity (https://github.com/Azure/aad-pod-identity)
+  # Alternative fields (kept for reference; not required if applicationGatewayID is set)
+  subscriptionId: "1c31cbbc-25c4-40cf-8e4e-44be901aa7ef"
+  resourceGroup: "pardeep-rg-0607"
+  name: "applicationgateway"
+  # usePrivateIP: false
+  # subResourceNamePrefix: "myPrefix"
+  # If you want AGIC to create a new AppGw, set name + subnetPrefix (and ensure identity has VNet permissions)
+  # subnetPrefix: "10.1.0.0/16"
+
+# Authentication with Azure Resource Manager
+# Choose one of the armAuth types below. Workload Identity is recommended for AKS.
+armAuth:
+  type: workloadIdentity
+  identityClientID: "<UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID>"
+
+# Legacy options (commented) if you use aad-pod-identity or service principal
 # armAuth:
 #   type: aadPodIdentity
-#   identityResourceID: <>
-#   identityClientID:  <>
+#   identityResourceID: "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<identity-name>"
+#   identityClientID: "<client-id>"
 #
-# - Option 2: ServicePrincipal as a kubernetes secret
 # armAuth:
 #   type: servicePrincipal
-#
-#   # Generate this value with:
-#   #   az ad sp create-for-rbac --subscription <subscription-uuid> --sdk-auth | base64 -w0
-#   secretJSON: <base64-encoded-JSON-blob>
-#   # name of existing Secret containing armAuth.json
-#   # if set, no secret is being created by the chart
 #   existingSecret: mysecret
-#
-# - Option 3: Workload Identity (https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview)
-# armAuth:
-#   type: workloadIdentity
-#   identityClientID:  <>
+#   secretJSON: <base64-encoded-JSON-blob>
 
-################################################################################
-# (Legacy: use `kubernetes.nodeSelector` instead) Specify the scheduling options
+# Node scheduling (legacy duplicate kept for compatibility)
 nodeSelector: {}
 
-################################################################################
-# Specify if the cluster is RBAC enabled or not
+# RBAC - set true if your cluster enforces RBAC
 rbac:
-  enabled: false # true/false
+  enabled: true
+
+# Pod security / resources / extra mounts (customize as needed)
+podSecurityContext: {}
+containerSecurityContext: {}
+podAnnotations: {}
+resources: {}
+volumes: {}
+
+# Optional: set ingressClass override
+# ingressClass: agic-2
+
+# Optional: additional settings
+# reconcilePeriodSeconds: 30
+
+# Optional: enable metrics / prometheus scraping (example)
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+
+# Optional: tolerations/affinity for scheduling
+tolerations: []
+affinity: {}
+
+# Optional: extra args to AGIC container
+extraArgs: {}
+
+# Optional: service account name (if you created a specific SA)
+serviceAccount:
+  create: false
+  name: agic-serviceaccount
+
+# Optional: nodePort / service type overrides
+service:
+  type: ClusterIP
+  port: 8123
+
+# Optional: imagePullSecrets
+imagePullSecrets: []
+
+# Notes:
+# 1) Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with the actual client id you will use for workload identity.
+# 2) Ensure the identity (principalId) has required Azure roles:
+#    - Contributor on Application Gateway (or RG) if AGIC must modify AppGw
+#    - Network Contributor on the VNet (or scope containing the subnet) to allow subnet join
+#    - Reader on resource group(s) as needed
+# 3) If you prefer not to use applicationGatewayID, you can remove that field and rely on subscriptionId/resourceGroup/name.
+# 4) After updating values.yaml, validate with:
+#    helm template . --name-template agic --namespace kube-system --kube-version 1.33 -f values.yaml --include-crds
+# 5) Then install/upgrade:
+#    helm upgrade --install agic application-gateway-ingress-controller/ingress-azure --namespace kube-system -f values.yaml
