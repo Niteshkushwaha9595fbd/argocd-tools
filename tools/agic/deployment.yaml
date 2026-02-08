@@ -7,21 +7,42 @@ metadata:
   annotations:
     azure.workload.identity/client-id: "4af1a466-2fe5-4505-8bc1-23971ea7ae2f"
 
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: agic-clusterrole
 rules:
+  # core resources used by AGIC
   - apiGroups: [""]
-    resources: ["pods", "services", "endpoints", "secrets", "nodes"]
-    verbs: ["get","list","watch","create","update","patch","delete"]
-  - apiGroups: [""]
-    resources: ["services","endpoints","pods","namespaces","secrets"]
+    resources: ["pods", "services", "endpoints", "secrets", "namespaces"]
     verbs: ["get", "list", "watch"]
+  # nodes read access (if AGIC needs node info)
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  # ingress and ingressclass
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "ingresses/status", "ingressclasses"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  # AGIC CRDs (appgw.ingress.azure.io)
+  - apiGroups: ["appgw.ingress.azure.io"]
+    resources:
+      - "azureapplicationgateways"
+      - "azureapplicationgatewaylisteners"
+      - "azureapplicationgatewayrewritepaths"
+      - "azureapplicationgatewayrewrites"
+      - "azureapplicationgatewaysslcertificates"
+      - "azureapplicationgatewayprobes"
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # allow reading ConfigMaps if AGIC uses them
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # leader election leases
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
-    verbs: ["get", "create", "update"]
+    verbs: ["get", "create", "update", "patch", "list", "watch"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -35,6 +56,7 @@ subjects:
   - kind: ServiceAccount
     name: agic-serviceaccount
     namespace: kube-system
+
 ---
 apiVersion: apps/v1
 kind: Deployment
