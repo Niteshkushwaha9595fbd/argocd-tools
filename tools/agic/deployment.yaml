@@ -22,9 +22,10 @@ spec:
         - name: ingress-azure
           image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:1.7.2
           imagePullPolicy: IfNotPresent
-          # pass flags as args so the image ENTRYPOINT is preserved
-          args:
-            - "--ingress-class=azure/application-gateway"
+          # Do not set raw args here — the image provides the correct ENTRYPOINT/command.
+          # If you need to pass flags, configure them via the Helm chart or set a proper
+          # `command` that calls the image executable followed by args. Keeping args here
+          # caused the runtime to attempt to exec the flag string as a command.
           envFrom:
             - secretRef:
                 name: agic-secrets
