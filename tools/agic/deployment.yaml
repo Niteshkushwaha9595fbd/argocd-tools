@@ -21,7 +21,11 @@ spec:
       containers:
         - name: ingress-azure
           image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:1.7.2
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
           # Do not set raw args here — the image provides the correct ENTRYPOINT/command.
           # If you need to pass flags, configure them via the Helm chart or set a proper
           # `command` that calls the image executable followed by args. Keeping args here
@@ -36,17 +40,24 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /healthz
               port: 8080
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             periodSeconds: 10
-            failureThreshold: 3
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 90
             periodSeconds: 20
             failureThreshold: 3

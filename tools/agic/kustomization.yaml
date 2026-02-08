@@ -2,11 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - deployment.yaml
-  - sa.yaml
-  - secret.yaml
-  - Clusterrole.yaml
-  - clusterrolebinding.yaml
+- ../AGIC/deployment.yaml
+- ../AGIC/sa.yaml
+- secret.yaml
+- ../AGIC/Clusterrole.yaml
+- ../AGIC/clusterrolebinding.yaml
 
 namespace: ingress-azure
 
@@ -16,5 +16,5 @@ images:
     newTag: 1.7.2
 
 replicas:
-  - name: ingress-azure-pod
-    count: 1
+- name: ingress-azure-pod
+  count: 1

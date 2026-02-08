@@ -6,6 +6,9 @@ subjects:
 - kind: ServiceAccount
   name: argocd-tools
   namespace: default
+- kind: ServiceAccount
+  name: ingress-azure-sa
+  namespace: ingress-azure
 roleRef:
   kind: ClusterRole
   name: agic-tools-clusterrole
