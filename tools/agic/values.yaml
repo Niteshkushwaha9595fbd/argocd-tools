@@ -1,6 +1,10 @@
-# Complete values.yaml for AGIC (with ServiceAccount block configured for Workload Identity)
-# Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with your actual identity client id
-
+# Complete values.yaml for AGIC configured to use a User Assigned Managed Identity (aad-pod-identity)
+# Replace the placeholder values below:
+#   - <UAMI_RESOURCE_ID> : full resource id of your user assigned managed identity
+#   - <UAMI_CLIENT_ID>   : clientId of the UAMI (you provided 4af1a466-2fe5-4505-8bc1-23971ea7ae2f)
+#   - <VNET_RESOURCE_ID> : resource id of the VNet (for role assignment)
+#   - <APPGW_RESOURCE_ID> : resource id of the Application Gateway (already set below)
+#
 verbosityLevel: 3
 
 image:
@@ -9,7 +13,6 @@ image:
   pullPolicy: Always
 
 kubernetes:
-  # Leave empty to watch all namespaces
   watchNamespace: ""
   httpServicePort: 8123
   multiClusterMode: false
@@ -30,18 +33,17 @@ kubernetes:
 
 # Application Gateway configuration
 appgw:
-  # Preferred: full resource id
   applicationGatewayID: "/subscriptions/1c31cbbc-25c4-40cf-8e4e-44be901aa7ef/resourceGroups/pardeep-rg-0607/providers/Microsoft.Network/applicationGateways/applicationgateway"
-
-  # Alternative fields (kept for reference)
   subscriptionId: "1c31cbbc-25c4-40cf-8e4e-44be901aa7ef"
   resourceGroup: "pardeep-rg-0607"
   name: "applicationgateway"
-  # subnetPrefix: "10.1.0.0/16"   # only if AGIC should create AppGw
 
-# Authentication with Azure Resource Manager (Workload Identity)
+# Authentication with Azure Resource Manager - using aad-pod-identity (UAMI)
 armAuth:
-  type: workloadIdentity
+  type: aadPodIdentity
+  # Set identityResourceID to the full resource id of your User Assigned Managed Identity
+  identityResourceID: "/subscriptions/1c31cbbc-25c4-40cf-8e4e-44be901aa7ef/resourceGroups/pardeep-rg-0607/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Pradeep-agic-role"
+  # Optional but useful: clientId of the UAMI
   identityClientID: "4af1a466-2fe5-4505-8bc1-23971ea7ae2f"
 
 # Node scheduling (legacy duplicate kept for compatibility)
@@ -51,62 +53,44 @@ nodeSelector: {}
 rbac:
   enabled: true
 
-# Pod security / resources / extra mounts (customize as needed)
 podSecurityContext: {}
 containerSecurityContext: {}
 podAnnotations: {}
 resources: {}
 volumes: {}
 
-# Optional: set ingressClass override
-# ingressClass: agic-2
-
-# Optional: additional settings
-# reconcilePeriodSeconds: 30
-
-# Optional: enable metrics / prometheus scraping (example)
 metrics:
   enabled: false
   serviceMonitor:
     enabled: false
 
-# Optional: tolerations/affinity for scheduling
 tolerations: []
 affinity: {}
 
-# Optional: extra args to AGIC container
 extraArgs: {}
 
 # -------------------------
-# ServiceAccount configuration
+# ServiceAccount configuration for aad-pod-identity
 # -------------------------
-# Using Workload Identity: create ServiceAccount and annotate it with the identity client id.
+# For aad-pod-identity, the ServiceAccount must be annotated with aadpodidentitybinding: "<selector>"
+# The selector must match the AzureIdentityBinding.selector you create in the cluster.
 serviceAccount:
   create: true
   name: agicserviceaccount
   annotations:
-    azure.workload.identity/client-id: "4af1a466-2fe5-4505-8bc1-23971ea7ae2f"
+    # This selector name must match the AzureIdentityBinding.selector (example below: agic-uami-selector)
+    aadpodidentitybinding: "agic-uami-selector"
 
-# If you prefer to manage SA outside Helm, set create: false and ensure SA exists with same name/annotation.
-
-# Optional: nodePort / service type overrides
 service:
   type: ClusterIP
   port: 8123
 
-# Optional: imagePullSecrets
 imagePullSecrets: []
 
-# Notes:
-# 1) Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with the actual client id used for workload identity.
-# 2) Ensure the Azure AD App federated credential exists with subject:
-#      system:serviceaccount:kube-system:agic-serviceaccount
-#    and audiences include api://AzureADTokenExchange.
-# 3) Ensure the identity (principalId) has required Azure roles:
-#    - Contributor on Application Gateway (or RG) if AGIC must modify AppGw
-#    - Network Contributor on the VNet (or scope containing the subnet) to allow subnet join
-#    - Reader on resource group(s) as needed
-# 4) Validate template before install:
-#    helm template . --name-template agic --namespace kube-system --kube-version 1.33 -f values.yaml --include-crds
-# 5) Install/upgrade:
-#    helm upgrade --install agic application-gateway-ingress-controller/ingress-azure --namespace kube-system -f values.yaml
+# Optional: additional notes for role assignment (replace placeholders)
+# APPGW_RESOURCE_ID is already set above in appgw.applicationGatewayID
+# VNET_RESOURCE_ID should be used when assigning Network Contributor to the UAMI:
+#   az role assignment create --assignee <UAMI_PRINCIPAL_ID> --role "Network Contributor" --scope <VNET_RESOURCE_ID>
+#   az role assignment create --assignee <UAMI_PRINCIPAL_ID> --role "Contributor" --scope /subscriptions/1c31cbbc-25c4-40cf-8e4e-44be901aa7ef/resourceGroups/pardeep-rg-0607/providers/Microsoft.Network/applicationGateways/applicationgateway
+
+# End of values.yaml
