@@ -41,7 +41,7 @@ metadata:
   labels:
     app: agic
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: agic
@@ -54,11 +54,6 @@ spec:
       containers:
         - name: agic
           image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:latest
-          args:
-            - --appgw-subscription-id=$(APPGW_SUBSCRIPTION_ID)
-            - --appgw-resource-group=$(APPGW_RESOURCE_GROUP)
-            - --appgw-name=$(APPGW_NAME)
-            - --watch-namespace=default
           env:
             - name: APPGW_SUBSCRIPTION_ID
               valueFrom:
@@ -75,6 +70,8 @@ spec:
                 secretKeyRef:
                   name: agic-secrets
                   key: appGwName
+            - name: WATCH_NAMESPACE
+              value: default
           resources:
             requests:
               cpu: 100m
