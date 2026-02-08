@@ -26,10 +26,6 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
-          # Do not set raw args here — the image provides the correct ENTRYPOINT/command.
-          # If you need to pass flags, configure them via the Helm chart or set a proper
-          # `command` that calls the image executable followed by args. Keeping args here
-          # caused the runtime to attempt to exec the flag string as a command.
           envFrom:
             - secretRef:
                 name: agic-secrets
@@ -61,3 +57,43 @@ spec:
             initialDelaySeconds: 90
             periodSeconds: 20
             failureThreshold: 3
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ingress-azure-sa
+  namespace: ingress-azure
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agic-tools-clusterrole
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments","daemonsets","replicasets","statefulsets"]
+  verbs: ["get","list","watch","patch","update"]
+- apiGroups: ["apps"]
+  resources: ["deployments/scale"]
+  verbs: ["get","update","patch"]
+- apiGroups: [""]
+  resources: ["pods","pods/exec","pods/log","services","endpoints","namespaces","events","nodes"]
+  verbs: ["get","list","watch","patch","update"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles","clusterroles"]
+  verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: agic-tools-clusterrolebinding
+subjects:
+- kind: ServiceAccount
+  name: argocd-tools
+  namespace: default
+- kind: ServiceAccount
+  name: ingress-azure-sa
+  namespace: ingress-azure
+roleRef:
+  kind: ClusterRole
+  name: agic-tools-clusterrole
+  apiGroup: rbac.authorization.k8s.io
