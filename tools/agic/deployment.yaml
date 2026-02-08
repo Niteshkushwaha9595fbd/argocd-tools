@@ -4,6 +4,9 @@ kind: ServiceAccount
 metadata:
   name: agic-serviceaccount
   namespace: kube-system
+  annotations:
+    azure.workload.identity/client-id: "4af1a466-2fe5-4505-8bc1-23971ea7ae2f"
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
