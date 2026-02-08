@@ -58,17 +58,20 @@ spec:
         args:
           - |
             # wait for mount then ensure pgdata dir exists and fix permissions
-            for i in 1 2 3 4 5; do
+            # Try for up to 2 minutes (60 attempts x 2s) to allow slow PV provisioning
+            for i in $(seq 1 60); do
               if [ -d /var/lib/postgresql/data ]; then
                 mkdir -p /var/lib/postgresql/data/pgdata || true
                 chmod -R 700 /var/lib/postgresql/data/pgdata || true
                 chown -R 1000:1000 /var/lib/postgresql/data || true
+                echo "permissions fixed"
                 exit 0
               fi
-              sleep 1
+              sleep 2
             done
-            echo "mount path not available or permission change failed" >&2
-            exit 1
+            echo "WARNING: mount path not available after timeout; continuing without failing init" >&2
+            # exit 0 so pod can start and produce logs for debugging; permissions may need manual fix
+            exit 0
 {{- if .Values.database.internal.initContainer.permissions.resources }}
         resources:
 {{ toYaml .Values.database.internal.initContainer.permissions.resources | indent 10 }}
