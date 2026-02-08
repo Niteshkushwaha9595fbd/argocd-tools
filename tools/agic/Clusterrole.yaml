@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agic-tools-clusterrole
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments","daemonsets","replicasets","statefulsets"]
+  verbs: ["get","list","watch","patch","update"]
+- apiGroups: ["apps"]
+  resources: ["deployments/scale"]
+  verbs: ["get","update","patch"]
+- apiGroups: [""]
+  resources: ["pods","pods/exec","pods/log","services","endpoints","namespaces","events","nodes"]
+  verbs: ["get","list","watch","patch","update"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles","clusterroles"]
+  verbs: ["get","list","watch"]

@@ -5,6 +5,8 @@ resources:
   - deployment.yaml
   - sa.yaml
   - secret.yaml
+  - Clusterrole.yaml
+  - clusterrolebinding.yaml
 
 namespace: ingress-azure
 
