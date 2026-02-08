@@ -1,129 +1,99 @@
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agic-serviceaccount
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agic-clusterrole
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "secrets", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions", "networking.k8s.io"]
+    resources: ["ingresses", "ingressclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "create", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: agic-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: agic-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: agic-serviceaccount
+    namespace: kube-system
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingress-azure-pod
-  namespace: ingress-azure
+  name: agic-deployment
+  namespace: kube-system
   labels:
-    app: ingress-azure
+    app: agic
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: ingress-azure
+      app: agic
   template:
     metadata:
       labels:
-        app: ingress-azure
+        app: agic
     spec:
-      serviceAccountName: ingress-azure-sa
-      securityContext:
-        fsGroup: 65534
+      serviceAccountName: agic-serviceaccount
       containers:
-        - name: ingress-azure
-          image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:1.7.2
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8080
-              name: http
-              protocol: TCP
+        - name: agic
+          image: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress:latest
+          args:
+            - --appgw-subscription-id=$(APPGW_SUBSCRIPTION_ID)
+            - --appgw-resource-group=$(APPGW_RESOURCE_GROUP)
+            - --appgw-name=$(APPGW_NAME)
+            - --watch-namespace=default
           env:
             - name: APPGW_SUBSCRIPTION_ID
               valueFrom:
                 secretKeyRef:
                   name: agic-secrets
-                  key: APPGW_SUBSCRIPTION_ID
-            - name: ARM_AUTH_TYPE
-              valueFrom:
-                secretKeyRef:
-                  name: agic-secrets
-                  key: ARM_AUTH_TYPE
-            - name: ARM_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: agic-secrets
-                  key: ARM_CLIENT_ID
+                  key: subscriptionId
             - name: APPGW_RESOURCE_GROUP
               valueFrom:
                 secretKeyRef:
                   name: agic-secrets
-                  key: APPGW_RESOURCE_GROUP
+                  key: resourceGroup
             - name: APPGW_NAME
               valueFrom:
                 secretKeyRef:
                   name: agic-secrets
-                  key: APPGW_NAME
-            - name: AKS_CLUSTER_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: agic-secrets
-                  key: AKS_CLUSTER_NAME
-            - name: AKS_RESOURCE_GROUP
-              valueFrom:
-                secretKeyRef:
-                  name: agic-secrets
-                  key: AKS_RESOURCE_GROUP
+                  key: appGwName
           resources:
             requests:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: "500m"
-              memory: "512Mi"
-          startupProbe:
-            httpGet:
-              path: /healthz
-              port: 8080
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            failureThreshold: 30
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 6
+              cpu: 500m
+              memory: 512Mi
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8080
-            initialDelaySeconds: 90
+            initialDelaySeconds: 30
             periodSeconds: 20
             failureThreshold: 3
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ingress-azure-sa
-  namespace: ingress-azure
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: agic-tools-clusterrole
-rules:
-- apiGroups: ["apps"]
-  resources: ["deployments","daemonsets","replicasets","statefulsets"]
-  verbs: ["get","list","watch","patch","update"]
-- apiGroups: ["apps"]
-  resources: ["deployments/scale"]
-  verbs: ["get","update","patch"]
-- apiGroups: [""]
-  resources: ["pods","pods/exec","pods/log","services","endpoints","namespaces","events","nodes"]
-  verbs: ["get","list","watch","patch","update"]
-- apiGroups: ["rbac.authorization.k8s.io"]
-  resources: ["roles","clusterroles"]
-  verbs: ["get","list","watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: agic-tools-clusterrolebinding
-subjects:
-- kind: ServiceAccount
-  name: ingress-azure-sa
-  namespace: ingress-azure
-roleRef:
-  kind: ClusterRole
-  name: agic-tools-clusterrole
-  apiGroup: rbac.authorization.k8s.io
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 30
