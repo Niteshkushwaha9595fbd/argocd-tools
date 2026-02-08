@@ -6,43 +6,28 @@ metadata:
   namespace: kube-system
   annotations:
     azure.workload.identity/client-id: "4af1a466-2fe5-4505-8bc1-23971ea7ae2f"
-
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: agic-clusterrole
 rules:
-  # core resources used by AGIC
-  - apiGroups: [""]
-    resources: ["pods", "services", "endpoints", "secrets", "namespaces"]
-    verbs: ["get", "list", "watch"]
-  # nodes read access (if AGIC needs node info)
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "watch"]
-  # ingress and ingressclass
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses", "ingresses/status", "ingressclasses"]
-    verbs: ["get", "list", "watch", "update", "patch"]
-  # AGIC CRDs (appgw.ingress.azure.io)
+    resources: ["ingresses", "ingressclasses"]
+    verbs: ["get","list","watch","update","patch"]
   - apiGroups: ["appgw.ingress.azure.io"]
     resources:
+      - "azureapplicationgatewayrewrites"
       - "azureapplicationgateways"
       - "azureapplicationgatewaylisteners"
-      - "azureapplicationgatewayrewritepaths"
-      - "azureapplicationgatewayrewrites"
-      - "azureapplicationgatewaysslcertificates"
-      - "azureapplicationgatewayprobes"
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  # allow reading ConfigMaps if AGIC uses them
+      - "azureapplicationgatewayrewrites" 
+    verbs: ["get","list","watch","create","update","patch","delete"]
   - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
-  # leader election leases
+    resources: ["pods","services","endpoints","secrets","namespaces","configmaps","nodes"]
+    verbs: ["get","list","watch"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
-    verbs: ["get", "create", "update", "patch", "list", "watch"]
-
+    verbs: ["get","create","update","patch","list","watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -56,6 +41,7 @@ subjects:
   - kind: ServiceAccount
     name: agic-serviceaccount
     namespace: kube-system
+
 
 ---
 apiVersion: apps/v1
