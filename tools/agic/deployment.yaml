@@ -26,9 +26,42 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
-          envFrom:
-            - secretRef:
-                name: agic-secrets
+          env:
+            - name: ARM_SUBSCRIPTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: ARM_SUBSCRIPTION_ID
+            - name: ARM_AUTH_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: ARM_AUTH_TYPE
+            - name: ARM_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: ARM_CLIENT_ID
+            - name: APPGW_RESOURCE_GROUP
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: APPGW_RESOURCE_GROUP
+            - name: APPGW_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: APPGW_NAME
+            - name: AKS_CLUSTER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: AKS_CLUSTER_NAME
+            - name: AKS_RESOURCE_GROUP
+              valueFrom:
+                secretKeyRef:
+                  name: agic-secrets
+                  key: AKS_RESOURCE_GROUP
           resources:
             requests:
               cpu: "100m"
@@ -87,9 +120,6 @@ kind: ClusterRoleBinding
 metadata:
   name: agic-tools-clusterrolebinding
 subjects:
-- kind: ServiceAccount
-  name: argocd-tools
-  namespace: default
 - kind: ServiceAccount
   name: ingress-azure-sa
   namespace: ingress-azure
