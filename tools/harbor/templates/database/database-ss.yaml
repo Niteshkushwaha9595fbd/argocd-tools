@@ -32,8 +32,8 @@ spec:
 {{- end }}
     spec:
       securityContext:
-        runAsUser: 999
-        fsGroup: 999
+        runAsUser: 1000
+        fsGroup: 1000
 {{- if .Values.database.internal.serviceAccountName }}
       serviceAccountName: {{ .Values.database.internal.serviceAccountName }}
 {{- end -}}
@@ -51,11 +51,24 @@ spec:
       - name: "data-permissions-ensurer"
         image: {{ .Values.database.internal.image.repository }}:{{ .Values.database.internal.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- if not (empty .Values.containerSecurityContext) }}
-        securityContext: {{ .Values.containerSecurityContext | toYaml | nindent 10 }}
-        {{- end }}
-        command: ["/bin/sh"]
-        args: ["-c", "chmod -R 700 /var/lib/postgresql/data/pgdata || true"]
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            # wait for mount then ensure pgdata dir exists and fix permissions
+            for i in 1 2 3 4 5; do
+              if [ -d /var/lib/postgresql/data ]; then
+                mkdir -p /var/lib/postgresql/data/pgdata || true
+                chmod -R 700 /var/lib/postgresql/data/pgdata || true
+                chown -R 1000:1000 /var/lib/postgresql/data || true
+                exit 0
+              fi
+              sleep 1
+            done
+            echo "mount path not available or permission change failed" >&2
+            exit 1
 {{- if .Values.database.internal.initContainer.permissions.resources }}
         resources:
 {{ toYaml .Values.database.internal.initContainer.permissions.resources | indent 10 }}
