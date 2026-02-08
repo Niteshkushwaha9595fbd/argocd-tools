@@ -1,6 +1,5 @@
-# Complete values.yaml for AGIC (merge of your provided values + required appgw and auth)
-# Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with your actual identity client id (for workload identity)
-# If you prefer using applicationGatewayID instead of subscription/resource/name, the applicationGatewayID field is already set.
+# Complete values.yaml for AGIC (with ServiceAccount block configured for Workload Identity)
+# Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with your actual identity client id
 
 verbosityLevel: 3
 
@@ -31,34 +30,19 @@ kubernetes:
 
 # Application Gateway configuration
 appgw:
-  # Preferred: full resource id (uncomment to use)
+  # Preferred: full resource id
   applicationGatewayID: "/subscriptions/1c31cbbc-25c4-40cf-8e4e-44be901aa7ef/resourceGroups/pardeep-rg-0607/providers/Microsoft.Network/applicationGateways/applicationgateway"
 
-  # Alternative fields (kept for reference; not required if applicationGatewayID is set)
+  # Alternative fields (kept for reference)
   subscriptionId: "1c31cbbc-25c4-40cf-8e4e-44be901aa7ef"
   resourceGroup: "pardeep-rg-0607"
   name: "applicationgateway"
-  # usePrivateIP: false
-  # subResourceNamePrefix: "myPrefix"
-  # If you want AGIC to create a new AppGw, set name + subnetPrefix (and ensure identity has VNet permissions)
-  # subnetPrefix: "10.1.0.0/16"
+  # subnetPrefix: "10.1.0.0/16"   # only if AGIC should create AppGw
 
-# Authentication with Azure Resource Manager
-# Choose one of the armAuth types below. Workload Identity is recommended for AKS.
+# Authentication with Azure Resource Manager (Workload Identity)
 armAuth:
   type: workloadIdentity
   identityClientID: "<UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID>"
-
-# Legacy options (commented) if you use aad-pod-identity or service principal
-# armAuth:
-#   type: aadPodIdentity
-#   identityResourceID: "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<identity-name>"
-#   identityClientID: "<client-id>"
-#
-# armAuth:
-#   type: servicePrincipal
-#   existingSecret: mysecret
-#   secretJSON: <base64-encoded-JSON-blob>
 
 # Node scheduling (legacy duplicate kept for compatibility)
 nodeSelector: {}
@@ -93,10 +77,17 @@ affinity: {}
 # Optional: extra args to AGIC container
 extraArgs: {}
 
-# Optional: service account name (if you created a specific SA)
+# -------------------------
+# ServiceAccount configuration
+# -------------------------
+# Using Workload Identity: create ServiceAccount and annotate it with the identity client id.
 serviceAccount:
-  create: false
-  name: agic-serviceaccount
+  create: true
+  name: agicserviceaccount
+  annotations:
+    azure.workload.identity/client-id: "<UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID>"
+
+# If you prefer to manage SA outside Helm, set create: false and ensure SA exists with same name/annotation.
 
 # Optional: nodePort / service type overrides
 service:
@@ -107,13 +98,15 @@ service:
 imagePullSecrets: []
 
 # Notes:
-# 1) Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with the actual client id you will use for workload identity.
-# 2) Ensure the identity (principalId) has required Azure roles:
+# 1) Replace <UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID> with the actual client id used for workload identity.
+# 2) Ensure the Azure AD App federated credential exists with subject:
+#      system:serviceaccount:kube-system:agic-serviceaccount
+#    and audiences include api://AzureADTokenExchange.
+# 3) Ensure the identity (principalId) has required Azure roles:
 #    - Contributor on Application Gateway (or RG) if AGIC must modify AppGw
 #    - Network Contributor on the VNet (or scope containing the subnet) to allow subnet join
 #    - Reader on resource group(s) as needed
-# 3) If you prefer not to use applicationGatewayID, you can remove that field and rely on subscriptionId/resourceGroup/name.
-# 4) After updating values.yaml, validate with:
+# 4) Validate template before install:
 #    helm template . --name-template agic --namespace kube-system --kube-version 1.33 -f values.yaml --include-crds
-# 5) Then install/upgrade:
+# 5) Install/upgrade:
 #    helm upgrade --install agic application-gateway-ingress-controller/ingress-azure --namespace kube-system -f values.yaml
