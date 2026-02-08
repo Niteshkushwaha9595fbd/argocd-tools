@@ -15,4 +15,4 @@ images:
 
 replicas:
   - name: ingress-azure-pod
-    count: 2
+    count: 1
