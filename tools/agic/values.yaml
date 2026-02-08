@@ -42,7 +42,7 @@ appgw:
 # Authentication with Azure Resource Manager (Workload Identity)
 armAuth:
   type: workloadIdentity
-  identityClientID: "<UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID>"
+  identityClientID: "a582e956-6fbd-4632-9d89-c56ecd8d0b9e"
 
 # Node scheduling (legacy duplicate kept for compatibility)
 nodeSelector: {}
@@ -85,7 +85,7 @@ serviceAccount:
   create: true
   name: agicserviceaccount
   annotations:
-    azure.workload.identity/client-id: "<UAMI_CLIENT_ID_OR_AAD_APP_CLIENT_ID>"
+    azure.workload.identity/client-id: "a582e956-6fbd-4632-9d89-c56ecd8d0b9e"
 
 # If you prefer to manage SA outside Helm, set create: false and ensure SA exists with same name/annotation.
 
