@@ -11,6 +11,4 @@ images:
 - name: mcr.microsoft.com/azure-application-gateway/kubernetes-ingress
   newTag: 1.7.2
 
-replicas:
-- name: ingress-azure-pod
-  count: 1
+
