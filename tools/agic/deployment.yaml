@@ -27,11 +27,11 @@ spec:
               name: http
               protocol: TCP
           env:
-            - name: ARM_SUBSCRIPTION_ID
+            - name: APPGW_SUBSCRIPTION_ID
               valueFrom:
                 secretKeyRef:
                   name: agic-secrets
-                  key: ARM_SUBSCRIPTION_ID
+                  key: APPGW_SUBSCRIPTION_ID
             - name: ARM_AUTH_TYPE
               valueFrom:
                 secretKeyRef:
